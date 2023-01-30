@@ -24,35 +24,35 @@ public class Tweet {
 	@Id
 	@GeneratedValue
 	private Long id;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "author_id")
 	private User author;
-	
+
 	private Timestamp posted;
-	
+
 	private boolean deleted;
-	
+
 	private String content;
-	
+
 	@ManyToMany(mappedBy = "likedTweet")
 	private List<User> likes;
-	
+
 	@ManyToMany(mappedBy = "mentions")
 	private List<User> mentions;
-	
+
 	@OneToMany(mappedBy = "inReplyTo")
 	private List<Tweet> replies;
-	
+
 	@ManyToOne
-	@JoinColumn(name= "reply_to_id")
+	@JoinColumn(name = "reply_to_id")
 	private Tweet inReplyTo;
-	
+
 	@OneToMany(mappedBy = "repostOf")
 	private List<Tweet> reposts;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "repost_id")
 	private Tweet repostOf;
-	
+
 }

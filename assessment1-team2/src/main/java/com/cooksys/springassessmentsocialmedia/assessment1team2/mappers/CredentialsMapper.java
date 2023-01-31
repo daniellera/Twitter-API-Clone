@@ -1,5 +1,6 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.mappers;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import org.mapstruct.Mapper;
 

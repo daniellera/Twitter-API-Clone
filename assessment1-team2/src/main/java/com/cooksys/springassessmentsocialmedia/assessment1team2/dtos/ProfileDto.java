@@ -5,8 +5,11 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class TweetRequestDto {
+public class ProfileDto {
 
-	private String content;
-	private CredentialsDto credentials;
+	private String firstName;
+	private String lastName;
+	private String email;
+	private String phoneNumber;
+	
 }

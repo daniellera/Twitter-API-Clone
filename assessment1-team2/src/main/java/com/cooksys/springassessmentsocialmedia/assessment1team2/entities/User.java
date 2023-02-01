@@ -3,6 +3,7 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.entities;
 import java.sql.Timestamp;
 import java.util.List;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,9 +23,10 @@ public class User {
 	private Long id;
 
 	@CreationTimestamp
+	@Column(nullable = false)
 	private Timestamp joined;
 
-	private boolean deleted;
+	private boolean deleted = false;
 
 	@ManyToMany
 	@JoinTable(name = "user_likes", joinColumns = { @JoinColumn(name = "tweet_id") }, inverseJoinColumns = {
@@ -45,16 +47,9 @@ public class User {
 	private List<User> following;
 
 	@Embedded
-	@AttributeOverrides({
-			@AttributeOverride( name = "username", column = @Column(nullable = false, unique = true)),
-			@AttributeOverride( name = "password", column = @Column(nullable = false))
-	})
 	private Credentials credentials;
 
 	@Embedded
-	@AttributeOverrides({
-			@AttributeOverride(name = "email", column = @Column(nullable = false))
-	})
 	private Profile profile;
 
 }

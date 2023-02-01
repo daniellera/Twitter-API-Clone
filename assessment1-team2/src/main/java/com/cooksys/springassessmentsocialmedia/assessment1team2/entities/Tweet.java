@@ -3,16 +3,11 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.entities;
 import java.sql.Timestamp;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,9 +23,10 @@ public class Tweet {
 	@JoinColumn(name = "author_id")
 	private User author;
 
+	@CreationTimestamp
 	private Timestamp posted;
 
-	private boolean deleted;
+	private boolean deleted = false;
 
 	private String content;
 
@@ -53,5 +49,11 @@ public class Tweet {
 	@ManyToOne
 	@JoinColumn(name = "repost_id")
 	private Tweet repostOf;
+
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "tweet_hashtags",
+			joinColumns = @JoinColumn(name = "tweet_id"),
+			inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
+	private List<Hashtag> hashtags;
 
 }

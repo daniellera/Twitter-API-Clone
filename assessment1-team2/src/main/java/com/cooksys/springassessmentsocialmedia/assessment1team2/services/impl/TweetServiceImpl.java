@@ -1,10 +1,7 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -12,7 +9,6 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRespon
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
@@ -24,39 +20,40 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TweetServiceImpl implements TweetService{
-	
+public class TweetServiceImpl implements TweetService {
+
 	private final TweetRepository tweetRepository;
 	private final UserRepository userRepository;
 	private final TweetMapper tweetMapper;
 	private final UserMapper userMapper;
-	
+
+	// private method built to find a tweet and handle errors if tweet is deleted.
 	private Tweet findTweetById(Long id) {
 		Optional<Tweet> optionalTweet = tweetRepository.findById(id);
-		if( optionalTweet.isEmpty() || optionalTweet.get().isDeleted() ) {
+		if (optionalTweet.isEmpty() || optionalTweet.get().isDeleted()) {
 			throw new NotFoundException("Tweet with ID: " + id + " not found.");
 		}
 		return optionalTweet.get();
 	}
 
-	// place holder for now. Need to implement fully once other post methods are completed.
+	// place holder for now. Need to implement fully once other post methods are
+	// completed.
 	@Override
 	public List<UserResponseDto> getAllMentions(Long id) {
 		Tweet tweets = findTweetById(id);
-		if(tweets == null) {
+		if (tweets == null) {
 			throw new NotFoundException("No tweets found.");
 		}
 		List<User> mentions = tweets.getMentions();
-		
+
 		return userMapper.entitiesToDtos(mentions);
 	}
 
 	@Override
 	public TweetResponseDto getTweetById(Long id) {
+
 		Tweet tweet = findTweetById(id);
-//		if(tweet == null || tweet.isDeleted()) {
-//			throw new NotFoundException("Tweet with id: " + id + "not found.");
-//		}
+
 		return tweetMapper.entityToDto(tweet);
 	}
 

@@ -6,4 +6,8 @@ public interface ValidateService {
 
 	boolean deleted(String username);
 
+    boolean usernameExists(String username);
+
+    boolean hashtagExists(String label);
+
 }

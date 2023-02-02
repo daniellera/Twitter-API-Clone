@@ -8,4 +8,5 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Hashtag
 @Repository
 public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
 
+    Hashtag findByLabelIs(String label);
 }

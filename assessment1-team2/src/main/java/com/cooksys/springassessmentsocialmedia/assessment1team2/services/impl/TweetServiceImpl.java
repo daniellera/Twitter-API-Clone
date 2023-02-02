@@ -33,7 +33,7 @@ public class TweetServiceImpl implements TweetService{
 	
 	private Tweet findTweetById(Long id) {
 		Optional<Tweet> optionalTweet = tweetRepository.findById(id);
-		if( optionalTweet == null ) {
+		if( optionalTweet.isEmpty() || optionalTweet.get().isDeleted() ) {
 			throw new NotFoundException("Tweet with ID: " + id + " not found.");
 		}
 		return optionalTweet.get();
@@ -49,6 +49,15 @@ public class TweetServiceImpl implements TweetService{
 		List<User> mentions = tweets.getMentions();
 		
 		return userMapper.entitiesToDtos(mentions);
+	}
+
+	@Override
+	public TweetResponseDto getTweetById(Long id) {
+		Tweet tweet = findTweetById(id);
+//		if(tweet == null || tweet.isDeleted()) {
+//			throw new NotFoundException("Tweet with id: " + id + "not found.");
+//		}
+		return tweetMapper.entityToDto(tweet);
 	}
 
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,11 @@ public class UserController {
 	@PostMapping
 	public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
 		return userService.createUser(userRequestDto);
+	}
+	
+	@DeleteMapping("/@{username}")
+	public UserResponseDto deleteUser(@PathVariable String username, @RequestBody Credentials credentials) {
+		return userService.deleteUser(username, credentials);
 	}
 	
 	@GetMapping("/@{username}/mentions")

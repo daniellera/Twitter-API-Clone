@@ -12,6 +12,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRespon
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
@@ -32,15 +33,19 @@ public class TweetServiceImpl implements TweetService{
 	
 	private Tweet findTweetById(Long id) {
 		Optional<Tweet> optionalTweet = tweetRepository.findById(id);
-		if( optionalTweet.isEmpty() ) {
+		if( optionalTweet == null ) {
 			throw new NotFoundException("Tweet with ID: " + id + " not found.");
 		}
 		return optionalTweet.get();
 	}
 
+	// place holder for now. Need to implement fully once other post methods are completed.
 	@Override
 	public List<UserResponseDto> getAllMentions(Long id) {
 		Tweet tweets = findTweetById(id);
+		if(tweets == null) {
+			throw new NotFoundException("No tweets found.");
+		}
 		List<User> mentions = tweets.getMentions();
 		
 		return userMapper.entitiesToDtos(mentions);

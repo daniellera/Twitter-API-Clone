@@ -33,14 +33,11 @@ public class ValidateServiceImpl implements ValidateService {
 	public boolean deleted(String username) {
 		Optional<User> deleted = userRepository.findByCredentialsUsername(username);
 		
-		if(deleted.get().isDeleted()) {
-			return true;
-			
-		} else if (deleted.isEmpty()) {
-			return true;
+		if(deleted.isEmpty()) {
+			return false;
 			
 		} else {
-			return false;			
+			return true;			
 		}
 	}
 

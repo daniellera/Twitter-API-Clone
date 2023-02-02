@@ -7,6 +7,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credent
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Profile;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotAuthorizedException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.CredentialsMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.ProfileMapper;
@@ -59,6 +60,16 @@ public class UserServiceImpl implements UserService {
 		return optionalUser.get();
 	}
 	
+	private User credentialCheck(Credentials credentials) {
+		User checkedUser = userRepository.findByCredentials_UsernameIs(credentials.getUsername());
+		if(checkedUser.getCredentials().getUsername().isEmpty()) {
+			throw new NotAuthorizedException("Invalid credentials, please try again.");
+		} else if (checkedUser.isDeleted()) {
+			throw new NotAuthorizedException("User is already deleted.");
+		}
+		return checkedUser;
+	}
+	
 	@Override
 	public UserResponseDto createUser(UserRequestDto userRequestDto) {
 		
@@ -85,17 +96,34 @@ public class UserServiceImpl implements UserService {
 			throw new BadRequestException("Email is a required field. Please enter a valid email and try again.");
 		}
 		
+		if(userToCreate.isDeleted()) {
+			userToCreate.setDeleted(false);
+			return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
+		}
+		
 		boolean available = validateService.available(userToCreate.getCredentials().getUsername());
 		
+		boolean deleted = validateService.deleted(userToCreate.getCredentials().getUsername());
+
 		if(!available) {
 			throw new BadRequestException("Username is already taken. Please choose another and try again.");
-		} else if ((userToCreate.isDeleted())) {
-			userToCreate.setDeleted(false);
-			userRepository.saveAndFlush(userToCreate);
+		} else if(deleted) {
+			User setDeleted = userRepository.findByCredentials_UsernameIs(userToCreate.getCredentials().getUsername());
+			setDeleted.setDeleted(false);
+			return userMapper.entityToDto(userRepository.saveAndFlush(setDeleted));
 		}
 		
 		return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
 		
+	}
+	
+	@Override
+	public UserResponseDto deleteUser(String username, Credentials credentials) {
+		
+		User deleteUser = credentialCheck(credentials);
+		deleteUser.setDeleted(true);
+		
+		return userMapper.entityToDto(userRepository.saveAndFlush(deleteUser));
 	}
 	
 	@Override
@@ -134,4 +162,6 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setProfile(profile);
         return userMapper.entityToDto(userRepository.saveAndFlush(userToUpdate));
     }
+
+	
 }

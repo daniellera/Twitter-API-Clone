@@ -1,6 +1,7 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.controllers;
 
 
+
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.services.UserService;
+import org.springframework.web.bind.annotation.*;
+
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
@@ -44,6 +51,13 @@ public class UserController {
     @GetMapping("/@{username}")
     public UserResponseDto getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
+    }
+
+    @PatchMapping("/@{username}")
+    public UserResponseDto updateUserProfile(
+            @PathVariable String username,
+            @RequestBody UserRequestDto userRequestDto) {
+        return userService.updateUserProfile(username, userRequestDto);
     }
 
 }

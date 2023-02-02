@@ -7,4 +7,6 @@ import java.util.List;
 public interface UserService {
 
     List<UserResponseDto> getActiveUsers();
+
+    UserResponseDto getUserByUsername(String username);
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 
@@ -13,4 +14,7 @@ public interface UserMapper {
 	UserResponseDto entityToDto(User entity);
 
 	List<UserResponseDto> entitiesToDtos(List<User> entities);
+
+	User dtoToEntity(UserRequestDto userRequestDto);
+
 }

@@ -7,6 +7,8 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

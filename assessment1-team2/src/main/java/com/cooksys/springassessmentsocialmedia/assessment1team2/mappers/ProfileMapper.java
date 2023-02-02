@@ -1,10 +1,12 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.mappers;
 
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ProfileDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Profile;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 
-import java.util.List;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ProfileDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Profile;
+
 
 @Mapper(componentModel = "spring")
 public interface ProfileMapper {

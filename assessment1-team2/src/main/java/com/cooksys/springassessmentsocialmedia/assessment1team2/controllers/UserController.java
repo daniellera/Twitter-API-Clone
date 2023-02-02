@@ -1,11 +1,9 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.controllers;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.UserService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +24,13 @@ public class UserController {
     @GetMapping("/@{username}")
     public UserResponseDto getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
+    }
+
+    @PatchMapping("/@{username}")
+    public UserResponseDto updateUserProfile(
+            @PathVariable String username,
+            @RequestBody UserRequestDto userRequestDto) {
+        return userService.updateUserProfile(username, userRequestDto);
     }
 
 }

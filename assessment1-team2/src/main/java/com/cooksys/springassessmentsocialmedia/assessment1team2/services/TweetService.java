@@ -1,12 +1,12 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services;
 
-import java.util.List;
-
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ContextDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
+
+import java.util.List;
 
 public interface TweetService {
 
@@ -29,4 +29,6 @@ public interface TweetService {
 	List<TweetResponseDto> getRepliesByTweetId(Long id);
 
 	ContextDto getContextByTweetId(Long id);
+
+	List<UserResponseDto> getLikesByTweetId(Long id);
 }

@@ -1,21 +1,14 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.controllers;
 
-import java.util.List;
-
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ContextDto;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.TweetService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -61,6 +54,11 @@ public class TweetController {
 	@GetMapping("/{id}/context")
 	public ContextDto getContextByTweetId(@PathVariable Long id) {
 		return tweetService.getContextByTweetId(id);
+	}
+
+	@GetMapping("/{id}/likes")
+	public List<UserResponseDto> getLikesByTweetId(@PathVariable Long id) {
+		return tweetService.getLikesByTweetId(id);
 	}
 
 }

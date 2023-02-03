@@ -212,4 +212,15 @@ public class TweetServiceImpl implements TweetService {
 		return contextDto;
 	}
 
+	@Override
+	public List<UserResponseDto> getLikesByTweetId(Long id) {
+		Tweet tweet = findTweetById(id);
+		List<User> likes = new ArrayList<>();
+		for (User like : tweet.getLikes()) {
+			if (like.isDeleted()) continue;
+			likes.add(like);
+		}
+		return userMapper.entitiesToDtos(likes);
+	}
+
 }

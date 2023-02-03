@@ -16,6 +16,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRe
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotAuthorizedException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.CredentialsMapper;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.ProfileMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.TweetRepository;
@@ -42,23 +43,31 @@ public class TweetServiceImpl implements TweetService {
 		}
 		return optionalTweet.get();
 	}
-	
-	private User validateTweetAuthor(CredentialsDto credentialsDto) {
-		User validateUser = userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername());
-		if(validateUser.getCredentials().getUsername().isEmpty()) {
+
+	private User validateTweetAuthor(Credentials credentials) {
+		Optional<User> validateUser = userRepository.findOneByCredentials(credentials);
+		if (validateUser.isEmpty()) {
 			throw new NotAuthorizedException("Credentials do not match.");
 		}
-		if(validateUser.isDeleted()) {
+		if (validateUser.get().isDeleted()) {
 			throw new NotAuthorizedException("User not found with those credentials.");
 		}
-		return validateUser;
+		return validateUser.get();
 	}
-	
+
 	private void validateTweet(TweetRequestDto tweetRequestDto) {
-		
-		if(tweetRequestDto.getContent() == null) {
+
+		if (tweetRequestDto.getContent() == null) {
 			throw new BadRequestException("You cannot submit an empty tweet.");
 		}
+	}
+	
+	private User findUserByUsername(String username) {
+		Optional<User> user = userRepository.findByCredentialsUsername(username);
+		if(user.isEmpty()) {
+			throw new NotFoundException("User not found with that username");
+		}
+		return user.get();
 	}
 
 	// place holder for now. Need to implement fully once other post methods are
@@ -89,23 +98,47 @@ public class TweetServiceImpl implements TweetService {
 
 	@Override
 	public TweetResponseDto createReplyTweet(Long id, TweetRequestDto tweetRequestDto) {
-		
+
 		Tweet repliedToTweet = findTweetById(id);
-		
+
 		validateTweet(tweetRequestDto);
+
+		User author = findUserByUsername(tweetRequestDto.getCredentials().getUsername());
 		
-		User author = validateTweetAuthor(tweetRequestDto.getCredentials());
+		validateTweetAuthor(credentialsMapper.dtoToEntity(tweetRequestDto.getCredentials()));
 		
-		Tweet reply = tweetMapper.requestDtoToEntity(tweetRequestDto);
-		
+		author.setCredentials(credentialsMapper.dtoToEntity(tweetRequestDto.getCredentials()));
+
+		Tweet reply = tweetMapper.dtoToEntity(tweetRequestDto);
+
+
 		List<Tweet> replies = repliedToTweet.getReplies();
-		
+		System.out.println(reply);
 		reply.setAuthor(author);
+		reply.setContent(tweetRequestDto.getContent());
 		reply.setInReplyTo(repliedToTweet);
 		replies.add(reply);
 		
 		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(reply));
+	}
+
+	@Override
+	public TweetResponseDto createRepostTweet(Long id, Credentials credentials) {
+		Tweet repostedTweet = findTweetById(id);
 		
+		TweetRequestDto tweet = tweetMapper.entityToDtoRequest(repostedTweet);
+
+		validateTweetAuthor(credentials);
+		
+		Tweet repost = tweetMapper.dtoToEntity(tweet);
+		
+		User author = findUserByUsername(credentials.getUsername());
+
+		repost.setAuthor(author);
+		repost.setContent(repostedTweet.getContent());
+		repost.setRepostOf(repostedTweet);
+
+		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(repost));
 	}
 
 	public List<TweetResponseDto> getAllTweets() {
@@ -113,18 +146,20 @@ public class TweetServiceImpl implements TweetService {
 	}
 
 	public User getUser(Credentials credentials) {
-		List<User> user =userRepository.findAll();
-		for(int i =0; i< user.size();i++) {
-			if(user.get(i).getCredentials().getUsername().equals( credentials.getUsername())&& user.get(i).getCredentials().getPassword().equals (credentials.getPassword())) {
+		List<User> user = userRepository.findAll();
+		for (int i = 0; i < user.size(); i++) {
+			if (user.get(i).getCredentials().getUsername().equals(credentials.getUsername())
+					&& user.get(i).getCredentials().getPassword().equals(credentials.getPassword())) {
 				user.get(i).setCredentials(credentials);
 				return user.get(i);
 			}
 		}
-		
-			throw new NotFoundException("No user found with the username: " + credentials.getUsername() + " or you are sending me an incorrect password");
-		
+
+		throw new NotFoundException("No user found with the username: " + credentials.getUsername()
+				+ " or you are sending me an incorrect password");
+
 	}
-	
+
 //	public String createMention (String tweetBody) {
 //		String mentionUser;
 //		String[] arrOfStr = tweetBody.split("@",2);
@@ -134,16 +169,18 @@ public class TweetServiceImpl implements TweetService {
 //		return mentionName;
 //		  
 //	}
-	
+
 	@Override
 	public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
-		if(tweetRequestDto == null || tweetRequestDto.getContent() == null || tweetRequestDto.getCredentials() == null) {
+		if (tweetRequestDto == null || tweetRequestDto.getContent() == null
+				|| tweetRequestDto.getCredentials() == null) {
 			throw new NotFoundException("Your tweet failed to send make sure you have your credentials and the tweet!");
 		}
-		CredentialsDto credentials = tweetRequestDto.getCredentials(); 
+		CredentialsDto credentials = tweetRequestDto.getCredentials();
 		Credentials credentialsEnt = credentialsMapper.dtoToEntity(credentials);
-		//make a getUsers method to verify that the credentials given have a user in the database.
-		User tweeter = getUser(credentialsEnt);	
+		// make a getUsers method to verify that the credentials given have a user in
+		// the database.
+		User tweeter = getUser(credentialsEnt);
 		Tweet tweetToCreate = tweetMapper.dtoToEntity(tweetRequestDto);
 		tweetToCreate.setAuthor(tweeter);
 		String tweetContent = tweetToCreate.getContent();
@@ -157,4 +194,5 @@ public class TweetServiceImpl implements TweetService {
 		Tweet tweetCreated = tweetRepository.saveAndFlush(tweetToCreate);
 		return tweetMapper.entityToDto(tweetCreated);
 	}
+
 }

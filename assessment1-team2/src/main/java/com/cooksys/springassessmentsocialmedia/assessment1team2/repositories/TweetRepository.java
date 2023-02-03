@@ -17,4 +17,6 @@ public interface TweetRepository extends JpaRepository<Tweet, Long> {
 	Optional<Tweet> findById(Long id);
 
     List<Tweet> findAllByAuthorOrderByPostedDesc(User author);
+
+	Tweet findByAuthor(String username);
 }

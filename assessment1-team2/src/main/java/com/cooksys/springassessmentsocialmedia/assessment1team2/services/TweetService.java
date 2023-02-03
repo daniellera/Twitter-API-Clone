@@ -5,6 +5,7 @@ import java.util.List;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 
 public interface TweetService {
@@ -20,5 +21,7 @@ public interface TweetService {
 	List<TweetResponseDto> getAllTweets();
 
 	TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
+
+	TweetResponseDto createRepostTweet(Long id, Credentials credentials);
 
 }

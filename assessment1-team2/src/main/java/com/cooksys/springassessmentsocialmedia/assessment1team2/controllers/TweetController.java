@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.TweetService;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,11 @@ public class TweetController {
 	@PostMapping
 	public TweetResponseDto createTweet(@RequestBody TweetRequestDto tweetRequestDto) {
 		return tweetService.createTweet(tweetRequestDto);
+	}
+	
+	@PostMapping("/{id}/repost")
+	public TweetResponseDto createRepostTweet(@PathVariable Long id, @RequestBody Credentials credentials) {
+		return tweetService.createRepostTweet(id, credentials);
 	}
 
 }

@@ -19,5 +19,7 @@ public interface TweetMapper {
 
 
 	Tweet dtoToEntity(TweetRequestDto tweetRequestDto);
+	
+	TweetRequestDto entityToDtoRequest(Tweet entity);
 
 }

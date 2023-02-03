@@ -2,6 +2,7 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.controllers;
 
 import java.util.List;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ContextDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,11 @@ public class TweetController {
 	@GetMapping("/{id}/replies")
 	public List<TweetResponseDto> getRepliesByTweetId(@PathVariable Long id) {
 		return tweetService.getRepliesByTweetId(id);
+	}
+
+	@GetMapping("/{id}/context")
+	public ContextDto getContextByTweetId(@PathVariable Long id) {
+		return tweetService.getContextByTweetId(id);
 	}
 
 }

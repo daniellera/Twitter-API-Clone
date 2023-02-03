@@ -2,12 +2,9 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
 import java.util.*;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.*;
 import org.springframework.stereotype.Service;
 
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
@@ -182,6 +179,37 @@ public class TweetServiceImpl implements TweetService {
 				tweetRepository.findByIdAndDeletedFalse(id).get() : null;
 		if (parentTweet == null) throw new NotFoundException("The parent tweet does not exist");
 		return tweetMapper.entitiesToDtos(parentTweet.getReplies());
+	}
+
+	@Override
+	public ContextDto getContextByTweetId(Long id) {
+		ContextDto contextDto = new ContextDto();
+		List<Tweet> before = new ArrayList<>();
+		List<Tweet> after = new ArrayList<>();
+
+		// Set target
+		Tweet targetTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent() ?
+				tweetRepository.findByIdAndDeletedFalse(id).get() : null;
+		contextDto.setTarget(tweetMapper.entityToDto(targetTweet));
+
+		// Set before
+		if (targetTweet == null) throw new NotFoundException("The target tweet does not exist");
+		Tweet parentTweet = targetTweet.getInReplyTo();
+		while (parentTweet != null) {
+			if (!parentTweet.isDeleted()) before.add(parentTweet);
+			parentTweet = parentTweet.getInReplyTo();
+		}
+		if (before.size() > 1) Collections.reverse(before);
+		contextDto.setBefore(tweetMapper.entitiesToDtos(before));
+
+		// Set after
+		for (Tweet reply : targetTweet.getReplies()) {
+			if (reply.isDeleted()) continue;
+			after.add(reply);
+		}
+		contextDto.setAfter(tweetMapper.entitiesToDtos(after));
+
+		return contextDto;
 	}
 
 }

@@ -23,4 +23,6 @@ public interface TweetService {
 
 	List<TweetResponseDto> getFeed(User user, List<User> followedUsers);
 
+	List<TweetResponseDto> getRepostsByTweetId(Long id);
+
 }

@@ -164,10 +164,16 @@ public class TweetServiceImpl implements TweetService {
 			feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(followedUser));
 		}
 		if (feed.size() == 0) throw new NotFoundException("Feed is empty");
-		System.out.println(feed);
 		feed.sort(Comparator.comparing(Tweet::getPosted));
-		Collections.reverse(feed);
 		return tweetMapper.entitiesToDtos(feed);
+	}
+
+	@Override
+	public List<TweetResponseDto> getRepostsByTweetId(Long id) {
+		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent() ?
+				tweetRepository.findByIdAndDeletedFalse(id).get() : null;
+		if (parentTweet == null) throw new NotFoundException("The parent tweet does not exist");
+		return tweetMapper.entitiesToDtos(tweetRepository.findByIdAndDeletedFalse(id).get().getReposts());
 	}
 
 }

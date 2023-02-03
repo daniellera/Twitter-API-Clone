@@ -38,4 +38,6 @@ public interface TweetService {
 
 	List<HashtagDto> getTagsByTweetId(Long id);
 
+	TweetResponseDto deleteTweet(Long id, Credentials credentials);
+
 }

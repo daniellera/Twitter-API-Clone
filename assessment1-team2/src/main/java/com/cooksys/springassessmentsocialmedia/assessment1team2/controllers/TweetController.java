@@ -2,6 +2,7 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.controllers;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,6 +80,11 @@ public class TweetController {
 	@GetMapping("/{id}/tags")
 	public List<HashtagDto> getTagsByTweetId(@PathVariable Long id) {
 		return tweetService.getTagsByTweetId(id);
+	}
+	
+	@DeleteMapping("/{id}")
+	public TweetResponseDto deleteTweet(@PathVariable Long id, @RequestBody Credentials credentials) {
+		return tweetService.deleteTweet(id, credentials);
 	}
 
 }

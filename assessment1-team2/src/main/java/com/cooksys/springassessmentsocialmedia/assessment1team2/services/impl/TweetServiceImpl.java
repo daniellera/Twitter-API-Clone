@@ -286,4 +286,19 @@ public class TweetServiceImpl implements TweetService {
 		return hashtagMapper.entitiesToDto(tweet.getHashtags());
 	}
 
+	@Override
+	public TweetResponseDto deleteTweet(Long id, Credentials credentials) {
+		
+		Tweet tweetToDelete = findTweetById(id);
+		
+		User author = findUserByUsername(credentials.getUsername());
+		
+		if(validateTweetAuthor(credentials) != author) {
+			throw new NotAuthorizedException("You are not authorized to delete this tweet.");
+		} else {
+			tweetToDelete.setDeleted(true);
+		}
+		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweetToDelete));
+	}
+
 }

@@ -57,4 +57,9 @@ public class TweetServiceImpl implements TweetService {
 		return tweetMapper.entityToDto(tweet);
 	}
 
+	@Override
+	public List<TweetResponseDto> getTweetsByAuthor(User author) {
+		return tweetMapper.entitiesToDtos(tweetRepository.findAllByAuthorOrderByPostedDesc(author));
+	}
+
 }

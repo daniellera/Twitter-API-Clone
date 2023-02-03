@@ -1,43 +1,28 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
-
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Profile;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotAuthorizedException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.CredentialsMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.ProfileMapper;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.UserRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-
-import org.springframework.stereotype.Service;
-
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.CredentialsMapper;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.ProfileMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.UserRepository;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.services.TweetService;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.UserService;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.ValidateService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +35,7 @@ public class UserServiceImpl implements UserService {
 	private final ValidateService validateService;
 	private final CredentialsMapper credentialsMapper;
 	private final ProfileMapper profileMapper;
+	private final TweetService tweetService;
 	
 	private User findByUsername(String username) {
 		Optional<User> optionalUser = userRepository.findByCredentialsUsername(username);
@@ -125,7 +111,12 @@ public class UserServiceImpl implements UserService {
 		
 		return userMapper.entityToDto(userRepository.saveAndFlush(deleteUser));
 	}
-	
+
+	@Override
+	public List<TweetResponseDto> getTweetsByAuthor(String username) {
+		return tweetService.getTweetsByAuthor(userRepository.findByCredentials_UsernameIs(username));
+	}
+
 	@Override
 	public List<TweetResponseDto> getAllMentions(String username) {
 		

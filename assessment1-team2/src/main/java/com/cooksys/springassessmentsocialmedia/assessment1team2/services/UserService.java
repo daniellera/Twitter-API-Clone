@@ -25,4 +25,5 @@ public interface UserService {
 
 	UserResponseDto deleteUser(String username, Credentials credentials);
 
+    List<TweetResponseDto> getTweetsByAuthor(String username);
 }

@@ -62,4 +62,9 @@ public class UserController {
 		return userService.updateUserProfile(username, userRequestDto);
 	}
 
+	@GetMapping("/@{username}/tweets")
+	public List<TweetResponseDto> getTweetsByAuthor(@PathVariable String username) {
+		return userService.getTweetsByAuthor(username);
+	}
+
 }

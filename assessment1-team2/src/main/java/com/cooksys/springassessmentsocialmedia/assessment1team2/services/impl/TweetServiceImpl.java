@@ -3,6 +3,7 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 import java.util.*;
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.*;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.HashtagMapper;
 import org.springframework.stereotype.Service;
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
@@ -29,6 +30,7 @@ public class TweetServiceImpl implements TweetService {
 	private final TweetMapper tweetMapper;
 	private final UserMapper userMapper;
 	private final CredentialsMapper credentialsMapper;
+	private final HashtagMapper hashtagMapper;
 
 	// private method built to find a tweet and handle errors if tweet is deleted.
 	private Tweet findTweetById(Long id) {
@@ -221,6 +223,12 @@ public class TweetServiceImpl implements TweetService {
 			likes.add(like);
 		}
 		return userMapper.entitiesToDtos(likes);
+	}
+
+	@Override
+	public List<HashtagDto> getTagsByTweetId(Long id) {
+		Tweet tweet = findTweetById(id);
+		return hashtagMapper.entitiesToDto(tweet.getHashtags());
 	}
 
 }

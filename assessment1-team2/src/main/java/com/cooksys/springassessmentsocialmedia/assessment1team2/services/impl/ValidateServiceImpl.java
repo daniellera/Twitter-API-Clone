@@ -50,4 +50,9 @@ public class ValidateServiceImpl implements ValidateService {
     public boolean hashtagExists(String label) {
         return hashtagService.getHashtagByLabel(label) != null;
     }
+
+	@Override
+	public boolean isUsernameAvailable(String username) {
+		return !usernameExists(username);
+	}
 }

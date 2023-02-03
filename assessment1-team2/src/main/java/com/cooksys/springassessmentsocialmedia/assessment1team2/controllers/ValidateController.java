@@ -24,4 +24,9 @@ public class ValidateController {
         return validateService.hashtagExists(label);
     }
 
+    @GetMapping("/username/available/@{username}")
+    public boolean isUsernameAvailable(@PathVariable String username) {
+        return validateService.isUsernameAvailable(username);
+    }
+
 }

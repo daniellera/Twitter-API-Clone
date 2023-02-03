@@ -21,4 +21,6 @@ public interface TweetService {
 
 	TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
 
+	List<TweetResponseDto> getFeed(User user, List<User> followedUsers);
+
 }

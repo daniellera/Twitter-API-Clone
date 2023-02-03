@@ -34,4 +34,7 @@ public interface UserService {
 	List<UserResponseDto> getFollowing(String username);
 
 	List<UserResponseDto> getFollowers(String username);
+
+	List<TweetResponseDto> getFeed(String username);
+
 }

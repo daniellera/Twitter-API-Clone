@@ -1,7 +1,6 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.stereotype.Service;
 
@@ -157,4 +156,18 @@ public class TweetServiceImpl implements TweetService {
 		Tweet tweetCreated = tweetRepository.saveAndFlush(tweetToCreate);
 		return tweetMapper.entityToDto(tweetCreated);
 	}
+
+	public List<TweetResponseDto> getFeed(User user, List<User> followedUsers) {
+		List<Tweet> feed = new ArrayList<>();
+		feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(user));
+		for (User followedUser : followedUsers) {
+			feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(followedUser));
+		}
+		if (feed.size() == 0) throw new NotFoundException("Feed is empty");
+		System.out.println(feed);
+		feed.sort(Comparator.comparing(Tweet::getPosted));
+		Collections.reverse(feed);
+		return tweetMapper.entitiesToDtos(feed);
+	}
+
 }

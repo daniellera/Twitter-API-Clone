@@ -1,11 +1,16 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ContextDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.HashtagDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
@@ -16,7 +21,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRe
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotAuthorizedException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.CredentialsMapper;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.ProfileMapper;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.HashtagMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.TweetRepository;
@@ -34,6 +39,7 @@ public class TweetServiceImpl implements TweetService {
 	private final TweetMapper tweetMapper;
 	private final UserMapper userMapper;
 	private final CredentialsMapper credentialsMapper;
+	private final HashtagMapper hashtagMapper;
 
 	// private method built to find a tweet and handle errors if tweet is deleted.
 	private Tweet findTweetById(Long id) {
@@ -61,10 +67,10 @@ public class TweetServiceImpl implements TweetService {
 			throw new BadRequestException("You cannot submit an empty tweet.");
 		}
 	}
-	
+
 	private User findUserByUsername(String username) {
 		Optional<User> user = userRepository.findByCredentialsUsername(username);
-		if(user.isEmpty()) {
+		if (user.isEmpty()) {
 			throw new NotFoundException("User not found with that username");
 		}
 		return user.get();
@@ -104,13 +110,12 @@ public class TweetServiceImpl implements TweetService {
 		validateTweet(tweetRequestDto);
 
 		User author = findUserByUsername(tweetRequestDto.getCredentials().getUsername());
-		
+
 		validateTweetAuthor(credentialsMapper.dtoToEntity(tweetRequestDto.getCredentials()));
-		
+
 		author.setCredentials(credentialsMapper.dtoToEntity(tweetRequestDto.getCredentials()));
 
 		Tweet reply = tweetMapper.dtoToEntity(tweetRequestDto);
-
 
 		List<Tweet> replies = repliedToTweet.getReplies();
 		System.out.println(reply);
@@ -118,20 +123,20 @@ public class TweetServiceImpl implements TweetService {
 		reply.setContent(tweetRequestDto.getContent());
 		reply.setInReplyTo(repliedToTweet);
 		replies.add(reply);
-		
+
 		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(reply));
 	}
 
 	@Override
 	public TweetResponseDto createRepostTweet(Long id, Credentials credentials) {
 		Tweet repostedTweet = findTweetById(id);
-		
+
 		TweetRequestDto tweet = tweetMapper.entityToDtoRequest(repostedTweet);
 
 		validateTweetAuthor(credentials);
-		
+
 		Tweet repost = tweetMapper.dtoToEntity(tweet);
-		
+
 		User author = findUserByUsername(credentials.getUsername());
 
 		repost.setAuthor(author);
@@ -193,6 +198,92 @@ public class TweetServiceImpl implements TweetService {
 //		tweeter.setMentions(mentions);
 		Tweet tweetCreated = tweetRepository.saveAndFlush(tweetToCreate);
 		return tweetMapper.entityToDto(tweetCreated);
+	}
+
+	public List<TweetResponseDto> getFeed(User user, List<User> followedUsers) {
+		List<Tweet> feed = new ArrayList<>();
+		feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(user));
+		for (User followedUser : followedUsers) {
+			feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(followedUser));
+		}
+		if (feed.size() == 0)
+			throw new NotFoundException("Feed is empty");
+		feed.sort(Comparator.comparing(Tweet::getPosted));
+		return tweetMapper.entitiesToDtos(feed);
+	}
+
+	@Override
+	public List<TweetResponseDto> getRepostsByTweetId(Long id) {
+		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent()
+				? tweetRepository.findByIdAndDeletedFalse(id).get()
+				: null;
+		if (parentTweet == null)
+			throw new NotFoundException("The parent tweet does not exist");
+		return tweetMapper.entitiesToDtos(parentTweet.getReposts());
+	}
+
+	@Override
+	public List<TweetResponseDto> getRepliesByTweetId(Long id) {
+		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent()
+				? tweetRepository.findByIdAndDeletedFalse(id).get()
+				: null;
+		if (parentTweet == null)
+			throw new NotFoundException("The parent tweet does not exist");
+		return tweetMapper.entitiesToDtos(parentTweet.getReplies());
+	}
+
+	@Override
+	public ContextDto getContextByTweetId(Long id) {
+		ContextDto contextDto = new ContextDto();
+		List<Tweet> before = new ArrayList<>();
+		List<Tweet> after = new ArrayList<>();
+
+		// Set target
+		Tweet targetTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent()
+				? tweetRepository.findByIdAndDeletedFalse(id).get()
+				: null;
+		contextDto.setTarget(tweetMapper.entityToDto(targetTweet));
+
+		// Set before
+		if (targetTweet == null)
+			throw new NotFoundException("The target tweet does not exist");
+		Tweet parentTweet = targetTweet.getInReplyTo();
+		while (parentTweet != null) {
+			if (!parentTweet.isDeleted())
+				before.add(parentTweet);
+			parentTweet = parentTweet.getInReplyTo();
+		}
+		if (before.size() > 1)
+			Collections.reverse(before);
+		contextDto.setBefore(tweetMapper.entitiesToDtos(before));
+
+		// Set after
+		for (Tweet reply : targetTweet.getReplies()) {
+			if (reply.isDeleted())
+				continue;
+			after.add(reply);
+		}
+		contextDto.setAfter(tweetMapper.entitiesToDtos(after));
+
+		return contextDto;
+	}
+
+	@Override
+	public List<UserResponseDto> getLikesByTweetId(Long id) {
+		Tweet tweet = findTweetById(id);
+		List<User> likes = new ArrayList<>();
+		for (User like : tweet.getLikes()) {
+			if (like.isDeleted())
+				continue;
+			likes.add(like);
+		}
+		return userMapper.entitiesToDtos(likes);
+	}
+
+	@Override
+	public List<HashtagDto> getTagsByTweetId(Long id) {
+		Tweet tweet = findTweetById(id);
+		return hashtagMapper.entitiesToDto(tweet.getHashtags());
 	}
 
 }

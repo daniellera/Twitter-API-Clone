@@ -8,18 +8,17 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetReques
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
+@Mapper(componentModel = "spring", uses = { UserMapper.class })
 public interface TweetMapper {
 
 	TweetResponseDto entityToDto(Tweet entity);
-	
-	List<TweetResponseDto> entitiesToDtos (List<Tweet> entities);
+
+	List<TweetResponseDto> entitiesToDtos(List<Tweet> entities);
 
 	Tweet requestDtoToEntity(TweetRequestDto tweetRequestDto);
 
-
 	Tweet dtoToEntity(TweetRequestDto tweetRequestDto);
-	
+
 	TweetRequestDto entityToDtoRequest(Tweet entity);
 
 }

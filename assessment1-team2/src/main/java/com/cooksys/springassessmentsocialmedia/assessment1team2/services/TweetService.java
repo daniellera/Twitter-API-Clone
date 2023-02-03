@@ -2,6 +2,8 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.services;
 
 import java.util.List;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ContextDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.HashtagDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
@@ -14,7 +16,7 @@ public interface TweetService {
 
 	TweetResponseDto getTweetById(Long id);
 
-    List<TweetResponseDto> getTweetsByAuthor(User author);
+	List<TweetResponseDto> getTweetsByAuthor(User author);
 
 	TweetResponseDto createReplyTweet(Long id, TweetRequestDto tweetRequestDto);
 
@@ -23,5 +25,17 @@ public interface TweetService {
 	TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
 
 	TweetResponseDto createRepostTweet(Long id, Credentials credentials);
+
+	List<TweetResponseDto> getFeed(User user, List<User> followedUsers);
+
+	List<TweetResponseDto> getRepostsByTweetId(Long id);
+
+	List<TweetResponseDto> getRepliesByTweetId(Long id);
+
+	ContextDto getContextByTweetId(Long id);
+
+	List<UserResponseDto> getLikesByTweetId(Long id);
+
+	List<HashtagDto> getTagsByTweetId(Long id);
 
 }

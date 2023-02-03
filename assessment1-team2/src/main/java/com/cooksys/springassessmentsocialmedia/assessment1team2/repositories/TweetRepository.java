@@ -13,10 +13,13 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 public interface TweetRepository extends JpaRepository<Tweet, Long> {
 
 	Optional<Tweet> findByIdAndDeletedFalse(Long id);
-	
+
 	Optional<Tweet> findById(Long id);
 
-    List<Tweet> findAllByAuthorOrderByPostedDesc(User author);
+	List<Tweet> findAllByAuthorOrderByPostedDesc(User author);
 
 	Tweet findByAuthor(String username);
+
+	List<Tweet> findAllByAuthorAndDeletedFalse(User author);
+
 }

@@ -17,6 +17,8 @@ public interface CredentialsMapper {
     List<CredentialsDto> entitiesToDtos(List<Credentials> credentialsList);
 
     List<Credentials> dtosToEntities(List<CredentialsDto> credentialsDtoList);
+
+	String dtoToEntity(String username);
     
     
 }

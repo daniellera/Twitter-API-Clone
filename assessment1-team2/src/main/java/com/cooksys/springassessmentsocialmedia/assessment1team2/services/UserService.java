@@ -1,17 +1,13 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services;
 
 
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
-
 import java.util.List;
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 
 public interface UserService {
 
@@ -31,7 +27,10 @@ public interface UserService {
 
 	CredentialsDto followUser(String userToFollow, CredentialsDto credentialsDto);
 
-	List<User> getFollowing(String username);
+	List<UserResponseDto> getFollowing(String username);
 
-	List<User> getFollowers(String username);
+	List<UserResponseDto> getFollowers(String username);
+
+	List<TweetResponseDto> getFeed(String username);
+
 }

@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
 	
 	private User credentialCheck(Credentials credentials) {
 		User checkedUser = userRepository.findByCredentials_UsernameIs(credentials.getUsername());
-		if(checkedUser.getCredentials().getUsername().isEmpty()) {
+		if(checkedUser == null || checkedUser.getCredentials().getUsername().isEmpty()) {
 			throw new NotAuthorizedException("Invalid credentials, please try again.");
 		} else if (checkedUser.isDeleted()) {
 			throw new NotAuthorizedException("User is already deleted.");
@@ -120,6 +120,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<TweetResponseDto> getFeed(String username) {
+		User user = userRepository.findByCredentials_UsernameIs(username);
+		if (user == null) throw new BadRequestException("No user found for username @" + username);
+		return tweetService.getFeed(user, user.getFollowing());
+	}
+
+	@Override
 	public List<TweetResponseDto> getAllMentions(String username) {
 		
 		User user = findByUsername(username);
@@ -185,14 +192,13 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 	@Override
-	public List<User> getFollowing(String username) {
-		return userRepository.findByCredentials_UsernameIs(username).getFollowing();
+	public List<UserResponseDto> getFollowing(String username) {
+		return userMapper.entitiesToDtos(userRepository.findByCredentials_UsernameIs(username).getFollowing());
 	}
 
 	@Override
-	public List<User> getFollowers(String username) {
-		return userRepository.findByCredentials_UsernameIs(username).getFollowers();
-	} 
-
+	public List<UserResponseDto> getFollowers(String username) {
+		return userMapper.entitiesToDtos(userRepository.findByCredentials_UsernameIs(username).getFollowers());
+	}
 	
 }

@@ -2,6 +2,7 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.controllers;
 
 import java.util.List;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,11 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ContextDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.HashtagDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetRequestDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.TweetService;
 
@@ -79,6 +75,11 @@ public class TweetController {
 	@GetMapping("/{id}/tags")
 	public List<HashtagDto> getTagsByTweetId(@PathVariable Long id) {
 		return tweetService.getTagsByTweetId(id);
+	}
+
+	@PostMapping("/{id}/like")
+	public void likeTweet(@PathVariable Long id, @RequestBody CredentialsDto credentialsDto) {
+		tweetService.likeTweet(id, credentialsDto);
 	}
 
 }

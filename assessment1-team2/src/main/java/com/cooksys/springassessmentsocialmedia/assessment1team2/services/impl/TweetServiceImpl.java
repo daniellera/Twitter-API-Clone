@@ -286,4 +286,23 @@ public class TweetServiceImpl implements TweetService {
 		return hashtagMapper.entitiesToDto(tweet.getHashtags());
 	}
 
+	@Override
+	public void likeTweet(Long id, CredentialsDto credentialsDto) {
+		User user = userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername());
+		if (user == null) throw new NotFoundException("Only registered users can like tweets");
+		Tweet tweet = findTweetById(id);
+
+		// Add user to tweet likes
+		List<User> likes = tweet.getLikes();
+		likes.add(user);
+		tweet.setLikes(likes);
+		tweetRepository.saveAndFlush(tweet);
+
+		// Add tweet to user likedTweets
+		List<Tweet> likedTweets = user.getLikedTweet();
+		likedTweets.add(tweet);
+		user.setLikedTweet(likedTweets);
+		userRepository.saveAndFlush(user);
+	}
+
 }

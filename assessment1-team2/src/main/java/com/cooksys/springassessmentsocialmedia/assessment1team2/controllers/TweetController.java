@@ -38,4 +38,13 @@ public class TweetController {
 		return tweetService.createReplyTweet(id, tweetRequestDto);
 	}
 
+	@GetMapping
+	public List<TweetResponseDto> getAllTweets(){
+		return tweetService.getAllTweets();
+	}
+	@PostMapping
+	public TweetResponseDto createTweet(@RequestBody TweetRequestDto tweetRequestDto) {
+		return tweetService.createTweet(tweetRequestDto);
+	}
+
 }

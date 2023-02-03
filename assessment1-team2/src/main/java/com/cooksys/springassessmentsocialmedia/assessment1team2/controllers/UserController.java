@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.UserService;
 import org.springframework.web.bind.annotation.*;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
@@ -65,6 +67,18 @@ public class UserController {
 	@GetMapping("/@{username}/tweets")
 	public List<TweetResponseDto> getTweetsByAuthor(@PathVariable String username) {
 		return userService.getTweetsByAuthor(username);
+	}
+	@PostMapping("/@{userToFollow}/follow")
+	public  CredentialsDto followUser (@PathVariable String userToFollow,@RequestBody CredentialsDto credentialsDto) {
+		return userService.followUser(userToFollow ,credentialsDto);
+	}
+	@GetMapping("/@{username}/following")
+	public List<User> getFollowing(@PathVariable String username) {
+		return userService.getFollowing(username);
+	}
+	@GetMapping("/@{username}/followers")
+	public List<User> getFollowers(@PathVariable String username) {
+		return userService.getFollowers(username);
 	}
 
 }

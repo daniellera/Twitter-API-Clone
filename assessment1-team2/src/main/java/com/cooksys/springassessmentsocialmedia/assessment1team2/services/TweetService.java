@@ -16,4 +16,9 @@ public interface TweetService {
     List<TweetResponseDto> getTweetsByAuthor(User author);
 
 	TweetResponseDto createReplyTweet(Long id, TweetRequestDto tweetRequestDto);
+
+	List<TweetResponseDto> getAllTweets();
+
+	TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
+
 }

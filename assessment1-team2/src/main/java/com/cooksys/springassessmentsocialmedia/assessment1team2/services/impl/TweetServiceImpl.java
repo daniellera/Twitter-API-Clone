@@ -15,6 +15,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotAuthorizedException;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.NotFoundException;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.CredentialsMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.TweetRepository;
@@ -31,6 +32,7 @@ public class TweetServiceImpl implements TweetService {
 	private final UserRepository userRepository;
 	private final TweetMapper tweetMapper;
 	private final UserMapper userMapper;
+	private final CredentialsMapper credentialsMapper;
 
 	// private method built to find a tweet and handle errors if tweet is deleted.
 	private Tweet findTweetById(Long id) {
@@ -106,4 +108,53 @@ public class TweetServiceImpl implements TweetService {
 		
 	}
 
+	public List<TweetResponseDto> getAllTweets() {
+		return tweetMapper.entitiesToDtos(tweetRepository.findAll());
+	}
+
+	public User getUser(Credentials credentials) {
+		List<User> user =userRepository.findAll();
+		for(int i =0; i< user.size();i++) {
+			if(user.get(i).getCredentials().getUsername().equals( credentials.getUsername())&& user.get(i).getCredentials().getPassword().equals (credentials.getPassword())) {
+				user.get(i).setCredentials(credentials);
+				return user.get(i);
+			}
+		}
+		
+			throw new NotFoundException("No user found with the username: " + credentials.getUsername() + " or you are sending me an incorrect password");
+		
+	}
+	
+//	public String createMention (String tweetBody) {
+//		String mentionUser;
+//		String[] arrOfStr = tweetBody.split("@",2);
+//		mentionUser = arrOfStr[1];
+//		String[] arrOfStr1 = mentionUser.split(" ",2);
+//		String mentionName=arrOfStr1[0];
+//		return mentionName;
+//		  
+//	}
+	
+	@Override
+	public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
+		if(tweetRequestDto == null || tweetRequestDto.getContent() == null || tweetRequestDto.getCredentials() == null) {
+			throw new NotFoundException("Your tweet failed to send make sure you have your credentials and the tweet!");
+		}
+		CredentialsDto credentials = tweetRequestDto.getCredentials(); 
+		Credentials credentialsEnt = credentialsMapper.dtoToEntity(credentials);
+		//make a getUsers method to verify that the credentials given have a user in the database.
+		User tweeter = getUser(credentialsEnt);	
+		Tweet tweetToCreate = tweetMapper.dtoToEntity(tweetRequestDto);
+		tweetToCreate.setAuthor(tweeter);
+		String tweetContent = tweetToCreate.getContent();
+//		String mention;
+//		if(tweetContent.contains("@")) {
+//			mention = createMention (tweetContent);
+//		}
+//		List<String> mentions;
+//		mentions.add(mention);
+//		tweeter.setMentions(mentions);
+		Tweet tweetCreated = tweetRepository.saveAndFlush(tweetToCreate);
+		return tweetMapper.entityToDto(tweetCreated);
+	}
 }

@@ -31,7 +31,7 @@ public interface UserService {
 
 	CredentialsDto followUser(String userToFollow, CredentialsDto credentialsDto);
 
-	List<User> getFollowing(String username);
+	List<UserResponseDto> getFollowing(String username);
 
-	List<User> getFollowers(String username);
+	List<UserResponseDto> getFollowers(String username);
 }

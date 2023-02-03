@@ -185,13 +185,13 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 	@Override
-	public List<User> getFollowing(String username) {
-		return userRepository.findByCredentials_UsernameIs(username).getFollowing();
+	public List<UserResponseDto> getFollowing(String username) {
+		return userMapper.entitiesToDtos(userRepository.findByCredentials_UsernameIs(username).getFollowing());
 	}
 
 	@Override
-	public List<User> getFollowers(String username) {
-		return userRepository.findByCredentials_UsernameIs(username).getFollowers();
+	public List<UserResponseDto> getFollowers(String username) {
+		return userMapper.entitiesToDtos(userRepository.findByCredentials_UsernameIs(username).getFollowers());
 	} 
 
 	

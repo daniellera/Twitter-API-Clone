@@ -173,7 +173,15 @@ public class TweetServiceImpl implements TweetService {
 		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent() ?
 				tweetRepository.findByIdAndDeletedFalse(id).get() : null;
 		if (parentTweet == null) throw new NotFoundException("The parent tweet does not exist");
-		return tweetMapper.entitiesToDtos(tweetRepository.findByIdAndDeletedFalse(id).get().getReposts());
+		return tweetMapper.entitiesToDtos(parentTweet.getReposts());
+	}
+
+	@Override
+	public List<TweetResponseDto> getRepliesByTweetId(Long id) {
+		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent() ?
+				tweetRepository.findByIdAndDeletedFalse(id).get() : null;
+		if (parentTweet == null) throw new NotFoundException("The parent tweet does not exist");
+		return tweetMapper.entitiesToDtos(parentTweet.getReplies());
 	}
 
 }

@@ -288,17 +288,36 @@ public class TweetServiceImpl implements TweetService {
 
 	@Override
 	public TweetResponseDto deleteTweet(Long id, Credentials credentials) {
-		
+
 		Tweet tweetToDelete = findTweetById(id);
-		
+
 		User author = findUserByUsername(credentials.getUsername());
-		
-		if(validateTweetAuthor(credentials) != author) {
+
+		if (validateTweetAuthor(credentials) != author) {
 			throw new NotAuthorizedException("You are not authorized to delete this tweet.");
 		} else {
 			tweetToDelete.setDeleted(true);
 		}
 		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweetToDelete));
+	}
+
+	@Override
+	public void likeTweet(Long id, CredentialsDto credentialsDto) {
+		User user = userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername());
+		if (user == null) throw new NotFoundException("Only registered users can like tweets");
+		Tweet tweet = findTweetById(id);
+
+		// Add user to tweet likes
+		List<User> likes = tweet.getLikes();
+		likes.add(user);
+		tweet.setLikes(likes);
+		tweetRepository.saveAndFlush(tweet);
+
+		// Add tweet to user likedTweets
+		List<Tweet> likedTweets = user.getLikedTweet();
+		likedTweets.add(tweet);
+		user.setLikedTweet(likedTweets);
+		userRepository.saveAndFlush(user);
 	}
 
 }

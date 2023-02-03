@@ -1,5 +1,6 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
@@ -21,6 +22,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.services.Validat
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -153,6 +155,44 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setProfile(profile);
         return userMapper.entityToDto(userRepository.saveAndFlush(userToUpdate));
     }
+    @Override
+	public CredentialsDto followUser(String userToFollow, CredentialsDto credentialsDto) {
+		List<User> user = userRepository.findAll();
+		int userToFollowIndex = 0;
+		int followerIndex= 0;
+		for(int i =0; i < user.size(); i++ ) {
+			if(userToFollow.equals( user.get(i).getCredentials().getUsername())) {
+				userToFollowIndex = i;
+			}
+		}
+		for(int i =0; i < user.size(); i++ ) {
+			if(credentialsDto.getUsername().equals(user.get(i).getCredentials().getUsername())) {
+				followerIndex = i;
+			}
+			
+		}
+		List<User> followers = new ArrayList<User>();
+		List<User> userToFollow1 = new ArrayList<User>();
+		followers.add(user.get(userToFollowIndex));
+		userToFollow1.add(user.get(followerIndex));
+		if(user.get(userToFollowIndex).getFollowers().equals(userToFollow1) ) {
+			throw new NotAuthorizedException("You are already following this user");
+		}
+		user.get(userToFollowIndex).setFollowers(userToFollow1);
+
+		userRepository.saveAllAndFlush(user);
+		
+		return null;
+	}
+	@Override
+	public List<User> getFollowing(String username) {
+		return userRepository.findByCredentials_UsernameIs(username).getFollowing();
+	}
+
+	@Override
+	public List<User> getFollowers(String username) {
+		return userRepository.findByCredentials_UsernameIs(username).getFollowers();
+	} 
 
 	
 }

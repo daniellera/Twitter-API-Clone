@@ -150,30 +150,24 @@ public class TweetServiceImpl implements TweetService {
 		return tweetMapper.entitiesToDtos(tweetRepository.findAll());
 	}
 
-	public User getUser(Credentials credentials) {
-		List<User> user = userRepository.findAll();
-		for (int i = 0; i < user.size(); i++) {
-			if (user.get(i).getCredentials().getUsername().equals(credentials.getUsername())
-					&& user.get(i).getCredentials().getPassword().equals(credentials.getPassword())) {
-				user.get(i).setCredentials(credentials);
-				return user.get(i);
-			}
-		}
-
+	public Optional<User> getUser(Credentials credentials) {
+		if( userRepository.findOneByCredentials(credentials) != null)
+			return userRepository.findOneByCredentials(credentials);
+	
 		throw new NotFoundException("No user found with the username: " + credentials.getUsername()
 				+ " or you are sending me an incorrect password");
 
 	}
 
-//	public String createMention (String tweetBody) {
-//		String mentionUser;
-//		String[] arrOfStr = tweetBody.split("@",2);
-//		mentionUser = arrOfStr[1];
-//		String[] arrOfStr1 = mentionUser.split(" ",2);
-//		String mentionName=arrOfStr1[0];
-//		return mentionName;
-//		  
-//	}
+	public String createMention (String tweetBody) {
+		String mentionUser;
+		String[] arrOfStr = tweetBody.split("@",2);
+		mentionUser = arrOfStr[1];
+		String[] arrOfStr1 = mentionUser.split(" ",2);
+		String mentionName=arrOfStr1[0];
+		return mentionName;
+		  
+	}
 
 	@Override
 	public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
@@ -185,19 +179,26 @@ public class TweetServiceImpl implements TweetService {
 		Credentials credentialsEnt = credentialsMapper.dtoToEntity(credentials);
 		// make a getUsers method to verify that the credentials given have a user in
 		// the database.
-		User tweeter = getUser(credentialsEnt);
+		Optional<User> tweeter = getUser(credentialsEnt);
+		User tweeterAuthor = tweeter.get();
 		Tweet tweetToCreate = tweetMapper.dtoToEntity(tweetRequestDto);
-		tweetToCreate.setAuthor(tweeter);
+		tweetToCreate.setAuthor(tweeterAuthor);
 		String tweetContent = tweetToCreate.getContent();
-//		String mention;
+		//Get mention in tweet
+//		String mention = null;
 //		if(tweetContent.contains("@")) {
 //			mention = createMention (tweetContent);
 //		}
-//		List<String> mentions;
-//		mentions.add(mention);
-//		tweeter.setMentions(mentions);
-		Tweet tweetCreated = tweetRepository.saveAndFlush(tweetToCreate);
-		return tweetMapper.entityToDto(tweetCreated);
+//		if (mention != null) {
+//		User userMentioned = userRepository.findByCredentials_UsernameIs(mention);
+//		List<User> userMentionedList = new ArrayList<>();
+//		userMentionedList.add(userMentioned);
+//		
+//		tweetToCreate.setMentions(userMentionedList);
+//		userRepository.saveAllAndFlush(userMentionedList);
+//		}
+		tweetRepository.saveAndFlush(tweetToCreate);
+		return tweetMapper.entityToDto(tweetToCreate);
 	}
 
 	public List<TweetResponseDto> getFeed(User user, List<User> followedUsers) {

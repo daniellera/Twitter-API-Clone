@@ -183,8 +183,26 @@ public class TweetServiceImpl implements TweetService {
 		User tweeterAuthor = tweeter.get();
 		Tweet tweetToCreate = tweetMapper.dtoToEntity(tweetRequestDto);
 		tweetToCreate.setAuthor(tweeterAuthor);
-		String tweetContent = tweetToCreate.getContent();
+		tweetToCreate.setContent(tweetRequestDto.getContent());
 		//Get mention in tweet
+		String tweetContent = tweetToCreate.getContent();
+		
+		if(tweetContent.contains("@")) {
+			
+			String mentioned = tweetContent;
+			
+			String sub = mentioned.subSequence('@', ' ').toString();
+			ArrayList<String> username = new ArrayList<>();
+			username.add(sub);
+			List<User> mentions = new ArrayList<>();
+			username.toArray();
+			
+			tweetToCreate.setMentions(mentions);
+//					(tweetToCreate.getContent().indexOf('@') + 1, tweetToCreate.getContent().indexOf(' '));
+					
+			
+		}
+		
 //		String mention = null;
 //		if(tweetContent.contains("@")) {
 //			mention = createMention (tweetContent);
@@ -197,6 +215,7 @@ public class TweetServiceImpl implements TweetService {
 //		tweetToCreate.setMentions(userMentionedList);
 //		userRepository.saveAllAndFlush(userMentionedList);
 //		}
+		
 		tweetRepository.saveAndFlush(tweetToCreate);
 		return tweetMapper.entityToDto(tweetToCreate);
 	}

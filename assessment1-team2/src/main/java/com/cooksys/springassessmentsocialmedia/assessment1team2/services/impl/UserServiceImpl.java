@@ -239,41 +239,60 @@ public class UserServiceImpl implements UserService {
     }
     @Override
 	public CredentialsDto followUser(String userToFollow, CredentialsDto credentialsDto) {
-		List<User> user = userRepository.findAll();
-		int userToFollowIndex = 0;
-		int followerIndex= 0;
-		for(int i =0; i < user.size(); i++ ) {
-			if(userToFollow.equals( user.get(i).getCredentials().getUsername())) {
-				userToFollowIndex = i;
-			}
+		if (userRepository.findByCredentials_UsernameIs(userToFollow) == null || userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername()) == null ) {
+			throw new NotFoundException("One of the users given is not created"); 
 		}
-		for(int i =0; i < user.size(); i++ ) {
-			if(credentialsDto.getUsername().equals(user.get(i).getCredentials().getUsername())) {
-				followerIndex = i;
-			}
-			
-		}
+		User userToFollowObj = userRepository.findByCredentials_UsernameIs(userToFollow);
+		User followersObj = userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername());
 		List<User> followers = new ArrayList<User>();
 		List<User> userToFollow1 = new ArrayList<User>();
-		followers.add(user.get(userToFollowIndex));
-		userToFollow1.add(user.get(followerIndex));
-		if(user.get(userToFollowIndex).getFollowers().equals(userToFollow1) ) {
+		followers.add(followersObj);
+		userToFollow1.add(userToFollowObj);
+		if(userToFollowObj.getFollowers().equals(userToFollow1) ) {
 			throw new NotAuthorizedException("You are already following this user");
 		}
-		user.get(userToFollowIndex).setFollowers(userToFollow1);
+		userToFollowObj.setFollowers(userToFollow1);
 
-		userRepository.saveAllAndFlush(user);
+		userRepository.saveAndFlush(userToFollowObj);
 		
 		return null;
 	}
 	@Override
 	public List<UserResponseDto> getFollowing(String username) {
+		if (userRepository.findByCredentials_UsernameIs(username) == null) {
+			throw new NotFoundException("No user exists with username " + username); 
+		}
 		return userMapper.entitiesToDtos(userRepository.findByCredentials_UsernameIs(username).getFollowing());
 	}
 
 	@Override
 	public List<UserResponseDto> getFollowers(String username) {
+		if (userRepository.findByCredentials_UsernameIs(username) == null) {
+			throw new NotFoundException("No user exists with username " + username); 
+		}
 		return userMapper.entitiesToDtos(userRepository.findByCredentials_UsernameIs(username).getFollowers());
+	}
+
+	@Override
+	public CredentialsDto unfollowUser(String userToFollow, CredentialsDto credentialsDto) {
+		if (userRepository.findByCredentials_UsernameIs(userToFollow) == null || userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername()) == null ) {
+			throw new NotFoundException("One of the users given is not created"); 
+		}
+		User userToUnfollowObj = userRepository.findByCredentials_UsernameIs(userToFollow);
+		User followersObj = userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername());
+		List<User> userToUnfollow = new ArrayList<User>();
+		userToUnfollow = followersObj.getFollowing();
+		int indexOfUserToUnfollow = 0;
+		//Remove user from list then update it 
+		for(int i = 0; i < userToUnfollow.size(); i++) {
+			indexOfUserToUnfollow = i;
+			if(userToUnfollow.get(indexOfUserToUnfollow) == userToUnfollowObj) {
+				userToUnfollow.remove(indexOfUserToUnfollow);
+				break;
+			}
+		}
+		userRepository.saveAndFlush(userToUnfollowObj);
+		return null;
 	}
 	
 }

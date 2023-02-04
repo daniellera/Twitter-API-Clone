@@ -150,9 +150,9 @@ public class TweetServiceImpl implements TweetService {
 		return tweetMapper.entitiesToDtos(tweetRepository.findAll());
 	}
 
-	public Optional<User> getUser(Credentials credentials) {
-		if( userRepository.findOneByCredentials(credentials) != null)
-			return userRepository.findOneByCredentials(credentials);
+	public User getUser(Credentials credentials) {
+		if(userRepository.findOneByCredentials(credentials).isPresent())
+			return userRepository.findOneByCredentials(credentials).get();
 	
 		throw new NotFoundException("No user found with the username: " + credentials.getUsername()
 				+ " or you are sending me an incorrect password");
@@ -179,8 +179,7 @@ public class TweetServiceImpl implements TweetService {
 		Credentials credentialsEnt = credentialsMapper.dtoToEntity(credentials);
 		// make a getUsers method to verify that the credentials given have a user in
 		// the database.
-		Optional<User> tweeter = getUser(credentialsEnt);
-		User tweeterAuthor = tweeter.get();
+		User tweeterAuthor = getUser(credentialsEnt);
 		Tweet tweetToCreate = tweetMapper.dtoToEntity(tweetRequestDto);
 		tweetToCreate.setAuthor(tweeterAuthor);
 		String tweetContent = tweetToCreate.getContent();

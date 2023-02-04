@@ -84,5 +84,10 @@ public class UserController {
 	public List<TweetResponseDto> getFeed(@PathVariable String username) {
 		return userService.getFeed(username);
 	}
+	@PostMapping("/@{userToFollow}/unfollow")
+	public CredentialsDto unfollowUser(@PathVariable String userToFollow, @RequestBody CredentialsDto credentialsDto) {
+		return userService.unfollowUser(userToFollow, credentialsDto);
+	}
+
 
 }

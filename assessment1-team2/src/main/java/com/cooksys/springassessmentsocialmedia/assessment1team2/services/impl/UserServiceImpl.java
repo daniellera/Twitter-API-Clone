@@ -1,6 +1,7 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.ProfileDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
@@ -22,6 +23,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.services.Validat
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,48 +64,121 @@ public class UserServiceImpl implements UserService {
 	public UserResponseDto createUser(UserRequestDto userRequestDto) {
 		
 		User userToCreate = userMapper.dtoToEntity(userRequestDto);
-		userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
-		userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
 		
-			
-		if(userToCreate.getCredentials() == null) {
+		String username = userRequestDto.getCredentials().getUsername();
+		String email = userRequestDto.getProfile().getEmail();
+		String password = userRequestDto.getCredentials().getPassword();
+		Credentials credentials = credentialsMapper.dtoToEntity(userRequestDto.getCredentials());
+		Profile profile = profileMapper.dtoToEntity(userRequestDto.getProfile());
+		
+		Optional<User> user = userRepository.findByCredentialsUsername(username);
+		
+		if(user.isPresent() && user.get().isDeleted() == false) {
+			throw new BadRequestException("Username is already taken. Please choose another and try again.");
+		}
+		
+		if(user.isPresent() && user.get().isDeleted()) {
+			user.get().setDeleted(false);
+			user.get().setCredentials(userToCreate.getCredentials());
+			user.get().getCredentials().setUsername(username);
+			user.get().getCredentials().setPassword(password);
+			user.get().getProfile().setEmail(email);
+			Timestamp joined = user.get().getJoined();
+			user.get().setJoined(joined);
+			return userMapper.entityToDto(userRepository.saveAndFlush(user.get()));
+		}
+		
+		if(user.isEmpty() && userToCreate.getCredentials() == null){
 			throw new BadRequestException("Please enter username, password, and email.");
 		}
-		if(userToCreate.getCredentials().getUsername() == null) {
-			throw new BadRequestException("Username is required. Please enter a username and try again.");
+		if(user.isEmpty() &&  userToCreate.getCredentials().getUsername() == null) {
+			throw new BadRequestException("Please enter a valid username.");
+		}
+		if(user.isEmpty() &&  userToCreate.getCredentials().getPassword() == null) {
+			throw new BadRequestException("Please enter a valid password.");
+		}
+		if(user.isEmpty() &&  userToCreate.getProfile() == null) {
+			throw new BadRequestException("Please fill out your profile with a valid email");
+		}
+		if(user.isEmpty() &&  userToCreate.getProfile().getEmail() == null){
+			throw new BadRequestException("A valid email is required.");
 		}
 		
-		if(userToCreate.getCredentials().getPassword() == null) {
-			throw new BadRequestException("A password is required. Please enter a password and try again.");
-		}
-		
-		if(userToCreate.getProfile() == null) {
-			throw new BadRequestException("Please enter a valid email.");
-		}
-		if(userToCreate.getProfile().getEmail() == null) {
-			throw new BadRequestException("Email is a required field. Please enter a valid email and try again.");
-		}
-		
-		if(userToCreate.isDeleted()) {
-			userToCreate.setDeleted(false);
-			return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
-		}
-		
-		boolean available = validateService.available(userToCreate.getCredentials().getUsername());
-		
-		boolean deleted = validateService.deleted(userToCreate.getCredentials().getUsername());
-
-		if(!available) {
-			throw new BadRequestException("Username is already taken. Please choose another and try again.");
-		} else if(deleted) {
-			User setDeleted = userRepository.findByCredentials_UsernameIs(userToCreate.getCredentials().getUsername());
-			setDeleted.setDeleted(false);
-			return userMapper.entityToDto(userRepository.saveAndFlush(setDeleted));
-		}
+//		userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
+		userToCreate.setCredentials(credentials);
+		userToCreate.getCredentials().setUsername(username);
+		userToCreate.getCredentials().setPassword(password);
+//		userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
+		userToCreate.setProfile(profile);
+		userToCreate.getProfile().setEmail(email);
 		
 		return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
+		}
+//		if(user.isEmpty()) {
+//			user.get().setDeleted(false);
+//			user.get().setCredentials(userToCreate.getCredentials());
+//			user.get().getCredentials().setUsername(username);
+//			user.get().getCredentials().setPassword(password);
+//			user.get().getProfile().setEmail(email);
+//			Timestamp joined = user.get().getJoined();
+//			user.get().setJoined(joined);
+//		}
 		
-	}
+//		if(userToCreate.getCredentials() == null) {
+//			throw new BadRequestException("Please enter username, password, and email.");
+//		}
+//		if(userToCreate.getCredentials().getUsername() == null) {
+//			throw new BadRequestException("Username is required. Please enter a username and try again.");
+//		}
+//		
+//		if(userToCreate.getCredentials().getPassword() == null) {
+//			throw new BadRequestException("A password is required. Please enter a password and try again.");
+//		}
+//		
+//		if(userToCreate.getProfile() == null) {
+//			throw new BadRequestException("Please enter a valid email.");
+//		}
+//		if(userToCreate.getProfile().getEmail() == null) {
+//			throw new BadRequestException("Email is a required field. Please enter a valid email and try again.");
+//		}
+		
+//		if(userToCreate.isDeleted() == true) {
+//			userToCreate.setDeleted(false);
+//			return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
+//		}
+		
+//		boolean available = validateService.available(userToCreate.getCredentials().getUsername());
+		
+//		boolean deleted = validateService.deleted(userToCreate.getCredentials().getUsername());
+
+//		if(!available) {
+//			throw new BadRequestException("Username is already taken. Please choose another and try again.");
+//		} 
+//			else if(deleted == true) {
+//			User setDeletedUser = userRepository.findByCredentials_UsernameIs(userToCreate.getCredentials().getUsername());
+//			setDeletedUser.setDeleted(false);
+//			setDeletedUser.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
+//			setDeletedUser.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
+//			return userMapper.entityToDto(userRepository.saveAndFlush(setDeletedUser));
+//		}
+		
+		
+//		if(user.isEmpty()) {
+//			user.get().setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
+//			user.get().getCredentials().setUsername(username);
+//			user.get().getCredentials().setPassword(password);
+//			user.get().setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
+//			user.get().getProfile().setEmail(email);
+//			return userMapper.entityToDto(userRepository.saveAndFlush(user.get()));
+//		}
+		
+//		userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
+//		userToCreate.getCredentials().setUsername(username);
+//		userToCreate.getCredentials().setPassword(password);
+//		userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
+//		userToCreate.getProfile().setEmail(email);
+//		return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
+//	}
 	
 	@Override
 	public UserResponseDto deleteUser(String username, Credentials credentials) {

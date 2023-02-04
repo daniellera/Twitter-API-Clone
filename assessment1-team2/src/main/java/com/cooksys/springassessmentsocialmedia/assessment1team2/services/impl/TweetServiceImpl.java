@@ -207,9 +207,7 @@ public class TweetServiceImpl implements TweetService {
 		for (User followedUser : followedUsers) {
 			feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(followedUser));
 		}
-		if (feed.size() == 0)
-			throw new NotFoundException("Feed is empty");
-		feed.sort(Comparator.comparing(Tweet::getPosted));
+		if (feed.size() > 1) feed.sort(Comparator.comparing(Tweet::getPosted));
 		return tweetMapper.entitiesToDtos(feed);
 	}
 

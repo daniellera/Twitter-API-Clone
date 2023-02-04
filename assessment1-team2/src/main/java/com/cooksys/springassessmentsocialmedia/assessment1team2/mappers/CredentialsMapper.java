@@ -18,7 +18,6 @@ public interface CredentialsMapper {
 
     List<Credentials> dtosToEntities(List<CredentialsDto> credentialsDtoList);
 
-	String dtoToEntity(String username);
     
     
 }

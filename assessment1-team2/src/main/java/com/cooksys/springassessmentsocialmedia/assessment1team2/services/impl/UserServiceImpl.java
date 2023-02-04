@@ -102,7 +102,6 @@ public class UserServiceImpl implements UserService {
 					Timestamp joined = user.get().getJoined();
 					user.get().setJoined(joined);
 					
-					
 					return userMapper.entityToDto(userRepository.saveAndFlush(user.get()));
 				}
 				if(user.isEmpty()) {

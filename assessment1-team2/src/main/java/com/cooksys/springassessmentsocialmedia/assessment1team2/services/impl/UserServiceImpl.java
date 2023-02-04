@@ -5,12 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.*;
 import org.springframework.stereotype.Service;
 
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.CredentialsDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
-import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Profile;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
@@ -59,6 +56,14 @@ public class UserServiceImpl implements UserService {
 			throw new NotAuthorizedException("User is already deleted.");
 		}
 		return checkedUser;
+	}
+
+	private Profile setupProfile(Profile profile, ProfileDto profileDto){
+		if (profileDto.getEmail() != null) profile.setEmail(profileDto.getEmail());
+		if (profileDto.getPhone() != null) profile.setPhone(profileDto.getPhone());
+		if (profileDto.getFirstName() != null) profile.setFirstName(profileDto.getFirstName());
+		if (profileDto.getLastName() != null) profile.setLastName(profileDto.getLastName());
+		return profile;
 	}
 	
 	@Override
@@ -211,15 +216,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUserProfile(String username, UserRequestDto userRequestDto) {
+		if (!validateService.usernameExists(username)) throw new BadRequestException("No such user");
         User userToUpdate = userRepository.findByCredentials_UsernameIs(username);
+		Timestamp joined = userToUpdate.getJoined();
+		if (userToUpdate.isDeleted()) throw new BadRequestException("No such user");
         Credentials credentials = credentialsMapper.dtoToEntity(userRequestDto.getCredentials());
-        Profile profile = profileMapper.dtoToEntity(userRequestDto.getProfile());
-        if (userToUpdate == null || userToUpdate.isDeleted())
-            throw new NotFoundException("No user exists with username " + username);
         if (!userToUpdate.getCredentials().equals(credentials))
-            throw new BadRequestException("Incorrect username and/or password provided");
-        userToUpdate.setProfile(profile);
-        return userMapper.entityToDto(userRepository.saveAndFlush(userToUpdate));
+            throw new NotAuthorizedException("You are not authorized to make this change");
+		if (userRequestDto.getProfile() == null)
+			throw new BadRequestException("No changes provided");
+        userToUpdate.setProfile(setupProfile(userToUpdate.getProfile(), userRequestDto.getProfile()));
+        userRepository.saveAndFlush(userToUpdate);
+//		userRepository.setJoined(userToUpdate.getId(), joined);
+		return userMapper.entityToDto(userRepository.findByCredentials_UsernameIs(username));
     }
     @Override
 	public CredentialsDto followUser(String userToFollow, CredentialsDto credentialsDto) {

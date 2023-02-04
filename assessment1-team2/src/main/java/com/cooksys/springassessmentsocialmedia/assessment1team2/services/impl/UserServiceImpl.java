@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
 		if(userToCreate.getCredentials() != null && userToCreate.getProfile() != null) {
 			Optional<User> user = userRepository.findByCredentialsUsername(userRequestDto.getCredentials().getUsername());
 			
-				if(user.isPresent() && !user.get().isDeleted()) {
+				if(user.isPresent() && user.get().isDeleted() == false) {
 					throw new BadRequestException("Username is already taken. Please choose another and try again.");
 				}
 				

@@ -217,12 +217,19 @@ public class TweetServiceImpl implements TweetService {
 				hashtagToCreate.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
 				hashtagToCreate.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
 				hashtagToCreate.setLabel(hashtag);
+				tweetToCreate.getHashtags().add(hashtagToCreate);
 				hashtagRepository.saveAndFlush(hashtagToCreate);
 //				List<Hashtag> hashtags = tagged.get().getLabel();
 				
 //				tweetToCreate.setHashtags(hashtags);
 //				hashtagRepository.saveAndFlush(hashtags);
 				
+			} else {
+				Hashtag update = hashtagRepository.findByLabelIs(hashtag);
+				update.setTweets(hashtagRepository.findByLabel(hashtag).get().getTweets());
+				update.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
+				tweetToCreate.getHashtags().add(update);
+				hashtagRepository.saveAndFlush(update);
 			}
 			
 		}

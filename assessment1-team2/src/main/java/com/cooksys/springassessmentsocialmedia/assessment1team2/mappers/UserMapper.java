@@ -3,6 +3,7 @@ package com.cooksys.springassessmentsocialmedia.assessment1team2.mappers;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserRequestDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;

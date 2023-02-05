@@ -110,20 +110,20 @@ public class UserServiceImpl implements UserService {
 					return userMapper.entityToDto(userRepository.saveAndFlush(user.get()));
 				}
 				if(user.isEmpty()) {
-					userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
 					userToCreate.getCredentials().setUsername(userRequestDto.getCredentials().getUsername());
 					userToCreate.getCredentials().setPassword(userRequestDto.getCredentials().getPassword());
-					userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
 					userToCreate.getProfile().setEmail(userRequestDto.getProfile().getEmail());
+					userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
+					userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
 					return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
 				}
 			}
 		
-		userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
 		userToCreate.getCredentials().setUsername(userRequestDto.getCredentials().getUsername());
 		userToCreate.getCredentials().setPassword(userRequestDto.getCredentials().getPassword());
-		userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
 		userToCreate.getProfile().setEmail(userRequestDto.getProfile().getEmail());
+		userToCreate.setProfile(profileMapper.dtoToEntity(userRequestDto.getProfile()));
+		userToCreate.setCredentials(credentialsMapper.dtoToEntity(userRequestDto.getCredentials()));
 		return userMapper.entityToDto(userRepository.saveAndFlush(userToCreate));
 	}
 //		if(user.isEmpty()) {

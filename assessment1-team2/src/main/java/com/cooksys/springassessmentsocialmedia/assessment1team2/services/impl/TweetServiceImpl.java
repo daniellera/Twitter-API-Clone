@@ -1,6 +1,9 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +19,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetReques
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.TweetResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.dtos.UserResponseDto;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Credentials;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Hashtag;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.Tweet;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.entities.User;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.exceptions.BadRequestException;
@@ -25,6 +29,7 @@ import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.Credenti
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.HashtagMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.TweetMapper;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.mappers.UserMapper;
+import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.HashtagRepository;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.TweetRepository;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.repositories.UserRepository;
 import com.cooksys.springassessmentsocialmedia.assessment1team2.services.TweetService;
@@ -41,6 +46,7 @@ public class TweetServiceImpl implements TweetService {
 	private final UserMapper userMapper;
 	private final CredentialsMapper credentialsMapper;
 	private final HashtagMapper hashtagMapper;
+	private final HashtagRepository hashtagRepository;
 
 	// private method built to find a tweet and handle errors if tweet is deleted.
 	private Tweet findTweetById(Long id) {
@@ -187,6 +193,7 @@ public class TweetServiceImpl implements TweetService {
 		//Get mention in tweet
 		String tweetContent = tweetToCreate.getContent();
 		
+		
 		if(tweetContent.contains("@")) {
 			
 			String username = tweetContent.subSequence('@', ' ').toString();
@@ -197,14 +204,34 @@ public class TweetServiceImpl implements TweetService {
 				System.out.println(mentions);
 				mentioned.setMentions(mentions);
 				tweetRepository.saveAllAndFlush(mentions);
+				}
+			
+			}
+		if(tweetContent.contains("#")) {
+			
+			String hashtag = tweetContent.subSequence('#', ' ').toString();
+			Hashtag hashtagToCreate = new Hashtag();
+			Optional<Hashtag> tagged = hashtagRepository.findByLabel(hashtag);
+			
+			if(tagged == null) {
+				hashtagToCreate.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
+				hashtagToCreate.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
+				hashtagToCreate.setLabel(hashtag);
+				hashtagRepository.saveAndFlush(hashtagToCreate);
+//				List<Hashtag> hashtags = tagged.get().getLabel();
+				
+//				tweetToCreate.setHashtags(hashtags);
+//				hashtagRepository.saveAndFlush(hashtags);
+				
 			}
 			
-			
+		}
+		
 			
 //					(tweetToCreate.getContent().indexOf('@') + 1, tweetToCreate.getContent().indexOf(' '));
 					
 			
-		}
+		
 		
 //		String mention = null;
 //		if(tweetContent.contains("@")) {

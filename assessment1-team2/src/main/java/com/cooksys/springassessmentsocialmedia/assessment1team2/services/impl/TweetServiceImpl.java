@@ -1,6 +1,7 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.services.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -188,15 +189,18 @@ public class TweetServiceImpl implements TweetService {
 		
 		if(tweetContent.contains("@")) {
 			
-			String mentioned = tweetContent;
+			String username = tweetContent.subSequence('@', ' ').toString();
+			User mentioned = findUserByUsername(username);
+			if(mentioned != null) {
+				List<Tweet> mentions = mentioned.getMentions();
+				mentions.addAll((Collection<? extends Tweet>) tweetToCreate.getAuthor());
+				System.out.println(mentions);
+				mentioned.setMentions(mentions);
+				tweetRepository.saveAllAndFlush(mentions);
+			}
 			
-			String sub = mentioned.subSequence('@', ' ').toString();
-			ArrayList<String> username = new ArrayList<>();
-			username.add(sub);
-			List<User> mentions = new ArrayList<>();
-			username.toArray();
 			
-			tweetToCreate.setMentions(mentions);
+			
 //					(tweetToCreate.getContent().indexOf('@') + 1, tweetToCreate.getContent().indexOf(' '));
 					
 			

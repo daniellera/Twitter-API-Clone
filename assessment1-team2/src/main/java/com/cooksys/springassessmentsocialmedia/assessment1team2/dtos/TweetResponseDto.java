@@ -17,6 +17,6 @@ public class TweetResponseDto {
 	private Timestamp posted;
 	private String content;
 	private Tweet inReplyTo;
-	private Tweet respostOf;
+	private Tweet repostOf;
 	
 }

@@ -118,39 +118,50 @@ public class TweetServiceImpl implements TweetService {
 
 		User author = findUserByUsername(tweetRequestDto.getCredentials().getUsername());
 
-		validateTweetAuthor(credentialsMapper.dtoToEntity(tweetRequestDto.getCredentials()));
+		validateTweetAuthor(author.getCredentials());
 
-		author.setCredentials(credentialsMapper.dtoToEntity(tweetRequestDto.getCredentials()));
+		Tweet tweetReply = tweetMapper.dtoToEntity(tweetRequestDto);
+		tweetReply.setAuthor(author);
+		tweetReply.setInReplyTo(repliedToTweet);
 
-		Tweet reply = tweetMapper.dtoToEntity(tweetRequestDto);
+		Tweet reply = tweetRepository.saveAndFlush(tweetReply);
 
 		List<Tweet> replies = repliedToTweet.getReplies();
-		System.out.println(reply);
-		reply.setAuthor(author);
-		reply.setContent(tweetRequestDto.getContent());
-		reply.setInReplyTo(repliedToTweet);
 		replies.add(reply);
+		repliedToTweet.setReplies(replies);
+		tweetRepository.saveAndFlush(repliedToTweet);
 
-		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(reply));
+		return tweetMapper.entityToDto(reply);
 	}
 
 	@Override
 	public TweetResponseDto createRepostTweet(Long id, Credentials credentials) {
-		Tweet repostedTweet = findTweetById(id);
-
-		TweetRequestDto tweet = tweetMapper.entityToDtoRequest(repostedTweet);
+		Tweet tweetToRepost = findTweetById(id);
 
 		validateTweetAuthor(credentials);
 
-		Tweet repost = tweetMapper.dtoToEntity(tweet);
+		Tweet repost = new Tweet();
 
-		User author = findUserByUsername(credentials.getUsername());
+		validateTweetAuthor(credentials);
+
+		User author = validateTweetAuthor(credentials);
 
 		repost.setAuthor(author);
-		repost.setContent(repostedTweet.getContent());
-		repost.setRepostOf(repostedTweet);
+		repost.setContent(tweetToRepost.getContent());
+		repost.setRepostOf(tweetToRepost);
+		System.out.println(repost.getRepostOf().getId());
+		repost = tweetRepository.saveAndFlush(repost);
+		System.out.println(repost.getRepostOf().getId());
 
-		return tweetMapper.entityToDto(tweetRepository.saveAndFlush(repost));
+		List<Tweet> reposts = new ArrayList<>(tweetToRepost.getReposts());
+
+		if (!reposts.contains(repost)) {
+			reposts.add(repost);
+			tweetToRepost.setReposts(reposts);
+			tweetRepository.saveAndFlush(tweetToRepost);
+		}
+
+		return tweetMapper.entityToDto(repost);
 	}
 
 	public List<TweetResponseDto> getAllTweets() {
@@ -267,19 +278,15 @@ public class TweetServiceImpl implements TweetService {
 
 	@Override
 	public List<TweetResponseDto> getRepostsByTweetId(Long id) {
-		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent()
-				? tweetRepository.findByIdAndDeletedFalse(id).get()
-				: null;
+		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).orElse(null);
 		if (parentTweet == null)
 			throw new NotFoundException("The parent tweet does not exist");
-		return tweetMapper.entitiesToDtos(parentTweet.getReposts());
+		return tweetMapper.entitiesToDtos(tweetRepository.findAllByRepostOf(parentTweet));
 	}
 
 	@Override
 	public List<TweetResponseDto> getRepliesByTweetId(Long id) {
-		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).isPresent()
-				? tweetRepository.findByIdAndDeletedFalse(id).get()
-				: null;
+		Tweet parentTweet = tweetRepository.findByIdAndDeletedFalse(id).orElse(null);
 		if (parentTweet == null)
 			throw new NotFoundException("The parent tweet does not exist");
 		return tweetMapper.entitiesToDtos(parentTweet.getReplies());

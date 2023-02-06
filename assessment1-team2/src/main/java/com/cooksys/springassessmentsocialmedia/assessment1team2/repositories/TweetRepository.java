@@ -22,4 +22,5 @@ public interface TweetRepository extends JpaRepository<Tweet, Long> {
 
 	List<Tweet> findAllByAuthorAndDeletedFalse(User author);
 
+	List<Tweet> findAllByRepostOf(Tweet tweet);
 }

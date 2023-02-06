@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.ManyToAny;
@@ -32,6 +33,7 @@ public class Hashtag {
 	@UpdateTimestamp
 	private Timestamp lastUsed;
 
+	@JsonIgnore
 	@ManyToMany(mappedBy = "hashtags", cascade = CascadeType.ALL)
 	private List<Tweet> tweets = new ArrayList<>();
 	

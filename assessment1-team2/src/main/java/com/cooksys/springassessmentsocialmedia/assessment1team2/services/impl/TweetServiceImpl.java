@@ -218,33 +218,27 @@ public class TweetServiceImpl implements TweetService {
 			String hashtag = tweetContent.substring(startIndex);
 			System.out.println(hashtag);
 			Optional<Hashtag> tagged = hashtagRepository.findByLabel(hashtag);
-			System.out.println("tagged created");
 			if(tagged.isEmpty()) {
 				hashtagToCreate = new Hashtag();
 				hashtagToCreate.setLabel(hashtag);
 				hashtagToCreate = hashtagRepository.saveAndFlush(hashtagToCreate);
 				hashtags.add(hashtagToCreate);
-				System.out.println("new hashtag added to repo");
 			} else {
 				hashtagToCreate = tagged.get();
 				hashtags.add(hashtagToCreate);
-				System.out.println("exiting hashtag added to repo");
 			}
 
 			tweetToCreate.setHashtags(hashtags);
-			System.out.println("hashtags set to tweet");
 		}
 
 		Long id = tweetRepository.saveAndFlush(tweetToCreate).getId();
 		Tweet createdTweet = tweetRepository.findById(id).orElse(null);
-		System.out.println("tweet saved");
 
 		if (mentioned != null) {
 			List<Tweet> mentions = mentioned.getMentions();
 			mentions.add(createdTweet);
 			mentioned.setMentions(mentions);
 			userRepository.saveAndFlush(mentioned);
-			System.out.println("user updated");
 		}
 
 		if (hashtagToCreate != null) {
@@ -253,10 +247,8 @@ public class TweetServiceImpl implements TweetService {
 				tweets.add(createdTweet);
 				tag.setTweets(tweets);
 				hashtagRepository.saveAndFlush(tag);
-				System.out.println("hashtag updated");
 			}
 		}
-		System.out.println("if failures, fails on return");
 		return tweetMapper.entityToDto(createdTweet);
 	}
 

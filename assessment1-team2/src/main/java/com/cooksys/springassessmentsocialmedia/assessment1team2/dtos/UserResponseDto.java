@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class UserResponseDto {
 
 	private Credentials credentials;
+	private String username;
 	private Profile profile;
 	private Timestamp joined;
 }

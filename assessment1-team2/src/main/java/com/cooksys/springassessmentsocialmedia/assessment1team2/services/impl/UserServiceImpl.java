@@ -232,15 +232,18 @@ public class UserServiceImpl implements UserService {
     }
     @Override
 	public CredentialsDto followUser(String userToFollow, CredentialsDto credentialsDto) {
-		if (userRepository.findByCredentials_UsernameIs(userToFollow) == null || userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername()) == null ) {
+		if (userRepository.findByCredentials_UsernameIs(userToFollow) == null ||
+				userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername()) == null ||
+				credentialsDto.getPassword() == null
+		) {
 			throw new NotFoundException("One of the users given is not created"); 
 		}
 		User userToFollowObj = userRepository.findByCredentials_UsernameIs(userToFollow);
 		User followersObj = userRepository.findByCredentials_UsernameIs(credentialsDto.getUsername());
 		List<User> followers = new ArrayList<User>();
 		List<User> userToFollow1 = new ArrayList<User>();
-		followers.add(followersObj);
-		userToFollow1.add(userToFollowObj);
+		followers.add(userToFollowObj);
+		userToFollow1.add(followersObj);
 		if(userToFollowObj.getFollowers().equals(userToFollow1) ) {
 			throw new NotAuthorizedException("You are already following this user");
 		}

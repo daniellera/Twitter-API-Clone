@@ -120,7 +120,7 @@ public class TweetServiceImpl implements TweetService {
 
 		validateTweetAuthor(author.getCredentials());
 
-		Tweet tweetReply = tweetMapper.dtoToEntity(tweetRequestDto);
+		Tweet tweetReply = tweetMapper.requestDtoToEntity(tweetRequestDto);
 		tweetReply.setAuthor(author);
 		tweetReply.setInReplyTo(repliedToTweet);
 
@@ -198,7 +198,7 @@ public class TweetServiceImpl implements TweetService {
 			// make a getUsers method to verify that the credentials given have a user in
 			// the database.
 			User tweeterAuthor = getUser(credentialsEnt);
-			Tweet tweetToCreate = tweetMapper.dtoToEntity(tweetRequestDto);
+			Tweet tweetToCreate = tweetMapper.requestDtoToEntity(tweetRequestDto);
 			tweetToCreate.setAuthor(tweeterAuthor);
 			tweetToCreate.setContent(tweetRequestDto.getContent());
 			//Get mention in tweet

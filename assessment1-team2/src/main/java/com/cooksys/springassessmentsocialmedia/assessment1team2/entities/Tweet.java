@@ -49,6 +49,7 @@ public class Tweet {
 	@JoinColumn(name = "reply_to_id")
 	private Tweet inReplyTo;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "repostOf")
 	private List<Tweet> reposts = new ArrayList<>();
 

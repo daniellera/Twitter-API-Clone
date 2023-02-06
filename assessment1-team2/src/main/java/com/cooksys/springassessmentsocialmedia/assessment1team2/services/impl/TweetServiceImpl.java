@@ -193,6 +193,7 @@ public class TweetServiceImpl implements TweetService {
 			//Get mention in tweet
 			String tweetContent = tweetToCreate.getContent();
 			
+			User mentioned = null;
 			
 			if(tweetContent.contains("@")) {
 	
@@ -201,67 +202,68 @@ public class TweetServiceImpl implements TweetService {
 				String username = endIndex <= startIndex ? tweetContent.substring(startIndex) :
 						tweetContent.substring(startIndex, endIndex);
 				System.out.println(username);
-				User mentioned = findUserByUsername(username);
-				if(mentioned != null) {
-					List<Tweet> mentions = mentioned.getMentions();
-					mentions.addAll((Collection<? extends Tweet>) tweetToCreate.getAuthor());
-					System.out.println(mentions);
-					mentioned.setMentions(mentions);
-					tweetRepository.saveAllAndFlush(mentions);
-					}
-				
-				}
+				mentioned = findUserByUsername(username);
+
+				List<User> mentionedUsers = new ArrayList<>();
+				mentionedUsers.add(mentioned);
+				tweetToCreate.setMentions(mentionedUsers);
+			}
+
+			Hashtag hashtagToCreate = null;
+			List<Hashtag> hashtags = new ArrayList<>();
 			if(tweetContent.contains("#")) {
 	
 				int startIndex = tweetContent.indexOf("#") + 1;
 				String hashtag = tweetContent.substring(startIndex);
 				System.out.println(hashtag);
-				Hashtag hashtagToCreate = new Hashtag();
+				
 				Optional<Hashtag> tagged = hashtagRepository.findByLabel(hashtag);
 				
 				if(tagged.isEmpty()) {
-					hashtagToCreate.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
-					hashtagToCreate.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
+					hashtagToCreate = new Hashtag();
 					hashtagToCreate.setLabel(hashtag);
-					tweetToCreate.getHashtags().add(hashtagToCreate);
-					hashtagRepository.saveAndFlush(hashtagToCreate);
-	//				List<Hashtag> hashtags = tagged.get().getLabel();
-					
-	//				tweetToCreate.setHashtags(hashtags);
-	//				hashtagRepository.saveAndFlush(hashtags);
+					hashtagToCreate = hashtagRepository.saveAndFlush(hashtagToCreate);
+					hashtags.add(hashtagToCreate);
+					System.out.println("new hashtag added to repo");
 					
 				} else {
-					Hashtag update = hashtagRepository.findByLabelIs(hashtag);
-					update.setTweets(hashtagRepository.findByLabel(hashtag).get().getTweets());
-					update.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
-					tweetToCreate.getHashtags().add(update);
-					hashtagRepository.saveAndFlush(update);
+					hashtagToCreate = tagged.get();
+					hashtags.add(hashtagToCreate);
+					System.out.println("exiting hashtag added to repo");
+				}
+
+				tweetToCreate.setHashtags(hashtags);
+				System.out.println("hashtags set to tweet");
+			}
+
+			Long id = tweetRepository.saveAndFlush(tweetToCreate).getId();
+			Tweet createdTweet = tweetRepository.findById(id).orElse(null);
+			System.out.println("tweet saved");
+
+			if (mentioned != null) {
+				List<Tweet> mentions = mentioned.getMentions();
+				mentions.add(createdTweet);
+				mentioned.setMentions(mentions);
+				userRepository.saveAndFlush(mentioned);
+				System.out.println("user updated");
+			}
+
+			if (hashtagToCreate != null) {
+				for (Hashtag tag : hashtags) {
+					List<Tweet> tweets = tag.getTweets();
+					tweets.add(createdTweet);
+					tag.setTweets(tweets);
+					hashtagRepository.saveAndFlush(tag);
+					System.out.println("hashtag updated");
 				}
 				
 			}
 			
-				
-	//					(tweetToCreate.getContent().indexOf('@') + 1, tweetToCreate.getContent().indexOf(' '));
-						
-				
 			
-			
-	//		String mention = null;
-	//		if(tweetContent.contains("@")) {
-	//			mention = createMention (tweetContent);
-	//		}
-	//		if (mention != null) {
-	//		User userMentioned = userRepository.findByCredentials_UsernameIs(mention);
-	//		List<User> userMentionedList = new ArrayList<>();
-	//		userMentionedList.add(userMentioned);
-	//		
-	//		tweetToCreate.setMentions(userMentionedList);
-	//		userRepository.saveAllAndFlush(userMentionedList);
-	//		}
-			
-			tweetRepository.saveAndFlush(tweetToCreate);
-			return tweetMapper.entityToDto(tweetToCreate);
+			System.out.println("if failures, fails on return");
+			return tweetMapper.entityToDto(createdTweet);
 		}
+
 
 	public List<TweetResponseDto> getFeed(User user, List<User> followedUsers) {
 		List<Tweet> feed = new ArrayList<>(tweetRepository.findAllByAuthorAndDeletedFalse(user));

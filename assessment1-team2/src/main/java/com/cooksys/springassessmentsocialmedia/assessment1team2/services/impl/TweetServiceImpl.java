@@ -195,8 +195,12 @@ public class TweetServiceImpl implements TweetService {
 		
 		
 		if(tweetContent.contains("@")) {
-			
-			String username = tweetContent.subSequence('@', ' ').toString();
+
+			int startIndex = tweetContent.indexOf("@") + 1;
+			int endIndex = tweetContent.indexOf("#") - 1;
+			String username = endIndex <= startIndex ? tweetContent.substring(startIndex) :
+					tweetContent.substring(startIndex, endIndex);
+			System.out.println(username);
 			User mentioned = findUserByUsername(username);
 			if(mentioned != null) {
 				List<Tweet> mentions = mentioned.getMentions();
@@ -208,12 +212,14 @@ public class TweetServiceImpl implements TweetService {
 			
 			}
 		if(tweetContent.contains("#")) {
-			
-			String hashtag = tweetContent.subSequence('#', ' ').toString();
+
+			int startIndex = tweetContent.indexOf("#") + 1;
+			String hashtag = tweetContent.substring(startIndex);
+			System.out.println(hashtag);
 			Hashtag hashtagToCreate = new Hashtag();
 			Optional<Hashtag> tagged = hashtagRepository.findByLabel(hashtag);
 			
-			if(tagged == null) {
+			if(tagged.isEmpty()) {
 				hashtagToCreate.setFirstUsed(Timestamp.valueOf(LocalDateTime.now()));
 				hashtagToCreate.setLastUsed(Timestamp.valueOf(LocalDateTime.now()));
 				hashtagToCreate.setLabel(hashtag);
@@ -258,8 +264,7 @@ public class TweetServiceImpl implements TweetService {
 	}
 
 	public List<TweetResponseDto> getFeed(User user, List<User> followedUsers) {
-		List<Tweet> feed = new ArrayList<>();
-		feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(user));
+		List<Tweet> feed = new ArrayList<>(tweetRepository.findAllByAuthorAndDeletedFalse(user));
 		for (User followedUser : followedUsers) {
 			feed.addAll(tweetRepository.findAllByAuthorAndDeletedFalse(followedUser));
 		}

@@ -1,6 +1,7 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.entities;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -32,6 +33,6 @@ public class Hashtag {
 	private Timestamp lastUsed;
 
 	@ManyToMany(mappedBy = "hashtags", cascade = CascadeType.ALL)
-	private List<Tweet> tweets;
+	private List<Tweet> tweets = new ArrayList<>();
 	
 }

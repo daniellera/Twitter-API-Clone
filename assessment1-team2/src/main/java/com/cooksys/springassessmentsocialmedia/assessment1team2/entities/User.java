@@ -1,6 +1,7 @@
 package com.cooksys.springassessmentsocialmedia.assessment1team2.entities;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.annotation.Nullable;
@@ -33,20 +34,20 @@ public class User {
 	@ManyToMany
 	@JoinTable(name = "user_likes", joinColumns = { @JoinColumn(name = "tweet_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "user_id") })
-	private List<Tweet> likedTweet;
+	private List<Tweet> likedTweet = new ArrayList<>();
 
 	@ManyToMany
 	@JoinTable(name = "user_mentions", joinColumns = { @JoinColumn(name = "tweet_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "user_id") })
-	private List<Tweet> mentions;
+	private List<Tweet> mentions = new ArrayList<>();
 
 	@ManyToMany
 	@JoinTable(name = "follower_following", joinColumns = { @JoinColumn(name = "follower_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "following_id") })
-	private List<User> followers;
+	private List<User> followers = new ArrayList<>();
 
 	@ManyToMany(mappedBy = "followers")
-	private List<User> following;
+	private List<User> following = new ArrayList<>();
 
 	@Embedded
 	private Credentials credentials;
